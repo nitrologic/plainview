@@ -57,6 +57,7 @@ typedef float F;
 typedef Rectangle R;
 
 struct Monitor {
+	S driver;
 	S name;
 	Zoom zoom;
 	R rect;
@@ -66,12 +67,14 @@ struct Monitor {
 		name = "not a display monitor";
 		zoom = 0.0;
 	}
-	Monitor(S monitorName,float scale,int x, int y,int w,int h) {
+	Monitor(S api,S monitorName,float scale,int x, int y,int w,int h) {
+		driver = api;
 		name = monitorName;
 		zoom = scale;
 		rect = { x,y,w,h };
 	}
 	Monitor(const Monitor& from) {
+		driver = from.driver;
 		name = from.name;
 		zoom = from.zoom;
 
@@ -92,18 +95,18 @@ Monitor NullMonitor;
 
 Monitor *currentMonitor=&NullMonitor;
 
-void addMonitor(S name, F scale, int x, int y, int w, int h) {
-	currentMonitor = new Monitor(name,scale,x,y,w,h);
+void addMonitor(S driver,S name, F scale, int x, int y, int w, int h) {
+	currentMonitor = new Monitor(driver,name,scale,x,y,w,h);
 	allMonitors.push_back(currentMonitor);
 }
 
 void dumpModes() {
 	for (Monitor *m : allMonitors) {
-		std::cout << "videodisplay-" << m->name << " ";
+		std::cout << m->driver << " " << m->name << " ";
 		std::cout << m->rect.x << "," << m->rect.y << "," << m->rect.w << "," << m->rect.h;
 		std::cout << std::endl;
 		for (const DensityFrequency &mode : m->modeTypes) {
-			std::cout << "\t" << mode.first << "Zoom " << mode.second << " Hz" << std::endl;
+			std::cout << "\t" << mode.first << "x " << mode.second << " Hz" << std::endl;
 			for (const VideoMode &videoMode : m->modeList[mode]) {
 				std::cout << "\t\t" << videoMode.mWidth << " x " << videoMode.mHeight << std::endl;
 			}
@@ -118,6 +121,9 @@ int sdlMain() {
 		std::cout << "SDL failure" << std::endl;
 		return 1;
 	}
+	SDL_version version;
+	SDL_GetVersion(&version);
+	std::cout << "SDL " << (int)version.major << "." << (int)version.minor << "." << (int)version.patch << std::endl;
 	int displayCount;
  	SDL_DisplayID* sdlDisplays = SDL_GetDisplays(&displayCount);
 	for(int i=0;i<displayCount;i++){
@@ -127,8 +133,8 @@ int sdlMain() {
 		const char *name = SDL_GetDisplayName(displayId);
 		float scale = SDL_GetDisplayContentScale(displayId);
 		int ok = SDL_GetDisplayBounds(displayId, &rect);
-		std::cout << "display #" << i << " \"" << name << "\" " << rect.x << "," << rect.y << "," << rect.w<< "," << rect.h << " x" << scale << std::endl;
-		addMonitor(name, scale, rect.x, rect.y, rect.w, rect.h);
+//		std::cout << "display #" << i << " \"" << name << "\" " << rect.x << "," << rect.y << "," << rect.w<< "," << rect.h << " x" << scale << std::endl;
+		addMonitor("SDL", name, scale, rect.x, rect.y, rect.w, rect.h);
 		int modeCount;
 		const SDL_DisplayMode** modes = SDL_GetFullscreenDisplayModes(displayId, &modeCount);
 		while (const SDL_DisplayMode *mode = *modes++) {
@@ -139,7 +145,6 @@ int sdlMain() {
 		}
 		displayId++;
 	}
-	dumpModes();
 	SDL_QuitSubSystem(sdlFlags);
 	return 0;
 }
@@ -150,7 +155,7 @@ int glfwMain() {
 		std::cout << "glfwInit failure" << std::endl;
 		exit(1);
 	}
-	std::cout << " GLFW " << glfwGetVersionString() << std::endl;
+	std::cout << "GLFW " << glfwGetVersionString() << std::endl;
 	int monitorCount;
 	GLFWmonitor** monitors = glfwGetMonitors(&monitorCount);
 	GLFWmonitor* primary = glfwGetPrimaryMonitor();
@@ -161,9 +166,9 @@ int glfwMain() {
 		int width, height;
 		glfwGetMonitorWorkarea(monitor, &xpos, &ypos,&width,&height);
 		char pri = (primary == monitor) ? '*' : ' ';
-		std::cout << " monitor #" << i << " " << name << " @ " << xpos << " , " << ypos << " , " << width << " , " << height << " " << pri << std::endl;
+//		std::cout << " monitor #" << i << " " << name << " @ " << xpos << " , " << ypos << " , " << width << " , " << height << " " << pri << std::endl;
 		float scale = 1.0;
-		addMonitor(name, scale, xpos, ypos, width, height);
+		addMonitor("GLFW", name, scale, xpos, ypos, width, height);
 		int modeCount;
 		const GLFWvidmode* mode = glfwGetVideoModes(monitor, &modeCount);
 		for (int j = 0; j < modeCount; j++) {
@@ -171,18 +176,19 @@ int glfwMain() {
 			int h = mode[j].height;
 			int hz = mode[j].refreshRate;
 			int bits = mode[j].redBits + mode[j].blueBits + mode[j].greenBits;
-			std::cout << "  mode #" << j << " " << w << " x " << h << " " << bits << "bpp " << hz << "hz" << std::endl;
+//			std::cout << "  mode #" << j << " " << w << " x " << h << " " << bits << "bpp " << hz << "hz" << std::endl;
 			// assert bits==24
 			currentMonitor->addMode(w, h, 1, hz);
 		}
 	}
-	dumpModes();
 	glfwTerminate();	
     return 0;
 }
 
 int main() {
 	std::cout << "plainview 0.1" << std::endl;
-//	return sdlMain();
-	return glfwMain();
+	sdlMain();
+	glfwMain();
+	dumpModes();
+	return 0;
 }
