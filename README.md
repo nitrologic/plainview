@@ -20,4 +20,4 @@ Copyright (c) 2002-2006 Marcus Geelnard
 Copyright (c) 2006-2019 Camilla Löwy 
 
 SDL 3.0
-Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+Copyright (C) 1997-2023 Sam Lantinga
