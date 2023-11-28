@@ -22,6 +22,7 @@ include_directories(
 )
 
 ADD_EXECUTABLE(plainview
+    glad/gl.h
     plainview.cpp 
 )
 

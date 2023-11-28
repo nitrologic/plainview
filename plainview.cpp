@@ -10,6 +10,9 @@ All Rights Reserved
 
 #include <iostream>
 
+#define GLAD_GL_IMPLEMENTATION
+
+#include "glad/gl.h"
 #include <GLFW/glfw3.h>
 
 #include <SDL3/SDL.h>
@@ -115,15 +118,56 @@ void dumpModes() {
 	std::cout << std::endl;
 }
 
-int sdlMain() {
-	Uint32 sdlFlags=SDL_INIT_VIDEO;
-	if (SDL_Init(sdlFlags) < 0) {
-		std::cout << "SDL failure" << std::endl;
-		return 1;
+struct Driver {
+	virtual int test() = 0;
+	virtual void close() = 0;
+};
+
+struct SDLDriver : Driver {
+
+	Uint32 sdlFlags;
+
+	SDLDriver() {
+		sdlFlags = SDL_INIT_VIDEO;
+		if (SDL_Init(sdlFlags) < 0) {
+			std::cout << "SDL failure" << std::endl;
+			return;
+		}
+		SDL_version version;
+		SDL_GetVersion(&version);
+		std::cout << "SDL " << (int)version.major << "." << (int)version.minor << "." << (int)version.patch << std::endl;
 	}
-	SDL_version version;
-	SDL_GetVersion(&version);
-	std::cout << "SDL " << (int)version.major << "." << (int)version.minor << "." << (int)version.patch << std::endl;
+
+	void close() {
+		SDL_QuitSubSystem(sdlFlags);
+	}
+
+	int test() {
+		SDL_Window* window = NULL;
+		SDL_Surface* screenSurface = NULL;
+		Uint32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_HIGH_PIXEL_DENSITY;
+		window = SDL_CreateWindow("plainview", 1024, 768, flags);
+
+		//		"hello_sdl2", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,1024,768,SDL_WINDOW_SHOWN);
+
+		if (window == NULL) {
+			fprintf(stderr, "could not create window: %s\n", SDL_GetError());
+			return 1;
+		}
+		screenSurface = SDL_GetWindowSurface(window);
+
+		SDL_FillSurfaceRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0xFF, 0xFF, 0xFF));
+		SDL_UpdateWindowSurface(window);
+		SDL_Delay(2000);
+		SDL_DestroyWindow(window);
+		SDL_Quit();
+	}
+
+};
+
+Driver *sdlOpen() {
+	SDLDriver *driver = new SDLDriver();
+
 	int displayCount;
  	SDL_DisplayID* sdlDisplays = SDL_GetDisplays(&displayCount);
 	for(int i=0;i<displayCount;i++){
@@ -145,17 +189,55 @@ int sdlMain() {
 		}
 		displayId++;
 	}
-	SDL_QuitSubSystem(sdlFlags);
-	return 0;
+	return driver;
 }
 
-int glfwMain() {
-	int glfwOK = glfwInit();
-	if (glfwOK != GLFW_TRUE) {
-		std::cout << "glfwInit failure" << std::endl;
-		exit(1);
+
+
+struct GLFWDriver :Driver {
+
+	GLFWDriver() {
+		int glfwOK = glfwInit();
+		if (glfwOK != GLFW_TRUE) {
+			std::cout << "glfwInit failure" << std::endl;
+			exit(1);
+		}
+		std::cout << "GLFW " << glfwGetVersionString() << std::endl;
 	}
-	std::cout << "GLFW " << glfwGetVersionString() << std::endl;
+
+	void close() {
+		glfwTerminate();
+	}
+
+	int test() {
+		GLFWwindow* window = glfwCreateWindow(640, 480, "Simple example", NULL, NULL);
+
+		glfwMakeContextCurrent(window);
+
+		glfwSwapInterval(1);
+
+		if (!gladLoadGL(glfwGetProcAddress)) // For GLAD 2 use the following instead: 
+		{
+			glfwTerminate();
+			exit(EXIT_FAILURE);
+		}
+
+		while (!glfwWindowShouldClose(window)){
+			glClearColor(1, 1, 0, 1);
+			glClear(GL_COLOR_BUFFER_BIT);
+			glfwSwapBuffers(window);
+			glfwPollEvents();
+		}
+
+		glfwDestroyWindow(window);
+
+		return 0;
+	}
+};
+
+Driver* glfwOpen() {
+	GLFWDriver* driver = new GLFWDriver();
+
 	int monitorCount;
 	GLFWmonitor** monitors = glfwGetMonitors(&monitorCount);
 	GLFWmonitor* primary = glfwGetPrimaryMonitor();
@@ -181,14 +263,28 @@ int glfwMain() {
 			currentMonitor->addMode(w, h, 1, hz);
 		}
 	}
-	glfwTerminate();	
-    return 0;
+
+	return driver;
+}
+
+int testDriver(Driver* driver) {
+	return driver->test();
 }
 
 int main() {
 	std::cout << "plainview 0.1" << std::endl;
-	sdlMain();
-	glfwMain();
+
+	Driver *sdlDriver = sdlOpen();
+	Driver* glfwDriver = glfwOpen();
+
+//	glfwMain();
+	
+//	testDriver(sdlDriver);
+	testDriver(glfwDriver);
+
 	dumpModes();
+
+	sdlDriver->close();
+
 	return 0;
 }
