@@ -1,5 +1,8 @@
 # plainview
+
 a plain view of the modern monitor video display landscape
+
+## Window manager evaluation
 
 ### SDL 3
 
@@ -13,7 +16,11 @@ a plain view of the modern monitor video display landscape
 * no CVDisplayLink support
 * no pixel density encoded in video mode
 
-# Credits
+## Latest
+
+[plainview1.png]
+
+## Credits
 
 GLFW3 3.4.0
 Copyright (c) 2002-2006 Marcus Geelnard

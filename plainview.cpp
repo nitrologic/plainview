@@ -2,11 +2,13 @@
 
 plainview.cpp
 
-(c)2023 Simon Armstrong
+Copyright © 2023 Simon Armstrong
 
 All Rights Reserved
 
 */
+
+const char *plainviewVersion = "0.2";
 
 #include <iostream>
 
@@ -210,7 +212,7 @@ struct GLFWDriver :Driver {
 	}
 
 	int test() {
-		GLFWwindow* window = glfwCreateWindow(640, 480, "Simple example", NULL, NULL);
+		GLFWwindow* window = glfwCreateWindow(640, 480, "GLFWDriver test window", NULL, NULL);
 
 		glfwMakeContextCurrent(window);
 
@@ -272,17 +274,18 @@ int testDriver(Driver* driver) {
 }
 
 int main() {
-	std::cout << "plainview 0.1" << std::endl;
+	std::cout << "plainview " << plainviewVersion << std::endl;
 
 	Driver *sdlDriver = sdlOpen();
 	Driver* glfwDriver = glfwOpen();
+
+	dumpModes();
 
 //	glfwMain();
 	
 //	testDriver(sdlDriver);
 	testDriver(glfwDriver);
 
-	dumpModes();
 
 	sdlDriver->close();
 
