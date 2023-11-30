@@ -18,7 +18,7 @@ a plain view of the modern monitor video display landscape
 
 ## Latest
 
-[plainview1.png]
+![plainview version 0.1](plainview1.png)
 
 ## Credits
 
