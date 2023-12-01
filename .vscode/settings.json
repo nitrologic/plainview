@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "xlocmes": "cpp"
+    },
+    "dotnet.defaultSolution": "disable"
+}
