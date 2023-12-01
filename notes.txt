@@ -1,3 +1,82 @@
+	void flip(int frame) {
+		SDLFrame& sdlFrame = frames[frame];
+		SDL_Window* window = sdlFrame.window;
+
+		//		SDL_Renderer* r = sdlFrame.renderer;
+		//		SDL_Surface *surface=sdlFrame.surface;
+		//		int g = frameCount++ % 100;
+		//		Uint32 c = SDL_MapRGB(surface->format, 44, g, 77);
+		Uint32 c = 0xffff00ff;
+		int x = 10 + frameCount % 40;
+		drawQuad(frame, { x * 10,10,40,40 }, c);
+		//		SDL_FillSurfaceRect(surface, NULL, c);
+		//		SDL_RenderPresent(r);
+		SDL_UpdateWindowSurface(window);
+	}
+
+
+	int test2() {
+		SDL_Window* window = NULL;
+		Uint32 flags = SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL;	// | SDL_WINDOW_HIGH_PIXEL_DENSITY;
+
+		int w = 1280;
+		int h = 960;
+		int hz = 75;
+
+		window = SDL_CreateWindow("plainview", w, h, flags);
+		//		"hello_sdl2", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,1024,768,SDL_WINDOW_SHOWN);
+		if (window == NULL) {
+			fprintf(stderr, "could not create window: %s\n", SDL_GetError());
+			return 1;
+		}
+
+		SDL_Surface* screenSurface = NULL;
+		screenSurface = SDL_GetWindowSurface(window);
+		int frameCount = 0;
+
+		bool running = true;
+		while (running) {			
+			int count = (frameCount++) % 100;
+			int g = count*2;
+			SDL_FillSurfaceRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 44, g, 77));
+			SDL_UpdateWindowSurface(window);
+			SDL_Event event;
+			if (SDL_WaitEventTimeout(&event, 5)) {
+				switch (event.type) {
+				case SDL_EVENT_KEY_DOWN:
+					running = false;
+					break;
+				}
+			}
+			SDL_Delay(5);
+//			std::cout << "." << std::endl;
+		}
+		SDL_DestroyWindow(window);
+		SDL_Quit();
+	}
+
+//		SDL_Renderer *r= sdlFrame.renderer;
+//		int ok = SDL_RenderClear(r);
+//		SDL_Renderer* r = sdlFrame.renderer;
+//		const SDL_FRect rect = { dest.x,dest.y,dest.w,dest.h };
+//		int ok = SDL_RenderRect(r, &rect);
+//		int g = frameCount++ % 100;
+//		Uint32 c = SDL_MapRGB(surface->format, 44, g, 77);
+
+//		SDL_Renderer* r = sdlFrame.renderer;
+//		const SDL_FRect rect = { dest.x,dest.y,dest.w,dest.h };
+//		int ok = SDL_RenderRect(r, &rect);
+//		int g = frameCount++ % 100;
+//		Uint32 c = SDL_MapRGB(surface->format, 44, g, 77);
+
+//		SDL_Renderer* r = sdlFrame.renderer;
+//		SDL_Surface *surface=sdlFrame.surface;
+//		int g = frameCount++ % 100;
+//		Uint32 c = SDL_MapRGB(surface->format, 44, g, 77);
+//		SDL_FillSurfaceRect(surface, NULL, c);
+//		SDL_RenderPresent(r);
+
+
 git submodule add https://github.com/glfw/glfw
 git submodule add https://github.com/libsdl-org/SDL
 
