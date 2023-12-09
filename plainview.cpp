@@ -34,7 +34,7 @@ struct Rectangle {
 
 struct VideoMode {
 	int mWidth, mHeight;
-	VideoMode(VideoMode& other) {
+	VideoMode(const VideoMode& other) {
 		mWidth = other.mWidth;
 		mHeight = other.mHeight;
 	}
@@ -225,12 +225,12 @@ struct SDLDriver : Driver {
 			SDL_Event event;
 			if (SDL_WaitEventTimeout(&event, 5)) {
 				switch (event.type) {
-				case SDL_EVENT_KEY_DOWN:
+				case SDL_EVENT_KEY_DOWN:{
 					SDL_Keysym key = event.key.keysym;
 					if (key.scancode == SDL_SCANCODE_ESCAPE) {
 						running = false;
 					}
-					break;
+					}break;
 				case SDL_EVENT_QUIT:
 					running = false;
 					break;
