@@ -209,7 +209,8 @@ struct SDLDriver : Driver {
 #else
 		Uint32 flags = 0;// SDL_WINDOW_OPENGL;	// | SDL_WINDOW_HIGH_PIXEL_DENSITY;
 #endif
-		int frame = addWindow(1280, 960, 75, flags);
+//		int frame = addWindow(1280, 960, 75, flags);
+		int frame = addWindow(1440, 900, 0, flags);
 		if (frame < 0) {
 			std::cout << "addWindow failure" << std::endl;
 			return -1;
@@ -237,7 +238,7 @@ struct SDLDriver : Driver {
 				}
 			}
 			SDL_Delay(5);
-//			std::cout << "." << std::endl;
+			std::cout << "." << std::endl;
 		}
 		closeWindow(frame);
 	}
