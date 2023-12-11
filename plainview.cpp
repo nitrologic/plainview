@@ -176,13 +176,18 @@ struct SDLDriver : Driver {
 		}
 		const char* name = "nitrologic";
 
-		SDL_Renderer * renderer = SDL_CreateRenderer(window,name, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
+		SDL_Renderer* renderer = SDL_CreateRenderer(window, name, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
 		SDL_Surface * surface = SDL_GetWindowSurface(window);
 
 		//window->format->format
 
 		Uint32 format = 0;
-		SDL_Texture * texture = SDL_CreateTexture(renderer, format, SDL_TEXTUREACCESS_STREAMING, w, h);
+		SDL_Texture * texture = SDL_CreateTexture(renderer, format, SDL_TEXTUREACCESS_TARGET, w, h);
+
+//		int vsync = SDL_SetWindowTextureVSync(window, 1);
+
+		int vsync = SDL_SetRenderVSync(renderer, 1);
+
 		int frameIndex = (int)frames.size();
 		frames.push_back({ window,surface,renderer,texture });
 		return frameIndex;
@@ -232,6 +237,40 @@ struct SDLDriver : Driver {
 		SDL_FillSurfaceRect(surface, &rect, c);
 	}
 
+	static const int MAX_RECT = 8192;
+
+	void drawQuads(int frame, R *dests, RGBA c,const int count) {
+		SDLFrame& sdlFrame = frames[frame];
+		SDL_Surface* surface = sdlFrame.surface;
+
+		SDL_Renderer* renderer = sdlFrame.renderer;
+		if (renderer) {
+			SDL_FRect frect[MAX_RECT];
+			for (int i = 0; i < count; i++) {
+				frect[i].x = dests->x;
+				frect[i].y = dests->y;
+				frect[i].w = dests->w;
+				frect[i].h = dests->h;
+				dests++;
+			}
+			SDL_SetRenderDrawColor(renderer, 250, 14, 23, 255);
+			SDL_RenderFillRects(renderer, frect, count);
+		} 
+		else 
+		{
+			SDL_Rect rect[MAX_RECT];
+			for (int i = 0; i < count; i++) {
+				rect[i].x = dests->x;
+				rect[i].y = dests->y;
+				rect[i].w = dests->w;
+				rect[i].h = dests->h;
+				dests++;
+			}
+			SDL_FillSurfaceRects(surface, rect, count, c);
+		}
+	}
+
+
 	void drawPlatter(int frame, int x, int y, int c, int radius, int denominator, int depth, float prot)
 	{
 		double rr = 2 * M_PI / denominator;
@@ -250,6 +289,9 @@ struct SDLDriver : Driver {
 		SDLFrame& sdlFrame = frames[frame];
 		SDL_Window* window = sdlFrame.window;
 		SDL_Renderer* renderer = sdlFrame.renderer;
+		SDL_Texture* texture = sdlFrame.texture;
+
+
 		int x = 10 + frameCount % 40;
 //		drawQuad(frame, { x * 10,10,4,4 }, 0xff44cc44);
 //		SDL_Texture* texture = sdlFrame.texture;
@@ -263,6 +305,9 @@ struct SDLDriver : Driver {
 //		int draw = SDL_RenderLines(renderer, points, 4);
 		SDL_FRect rect = {20.0+x, 20.0+x, 100.0, 100.0};
 		SDL_RenderFillRect(renderer, &rect);
+
+		SDL_RenderTexture(renderer, texture, NULL, NULL);
+
 		SDL_RenderPresent(renderer);
 	}
 
@@ -282,6 +327,8 @@ struct SDLDriver : Driver {
 
 		if (renderer)
 		{
+			SDL_Texture* texture = sdlFrame.texture;
+			SDL_RenderTexture(renderer, texture, NULL, NULL);
 			SDL_RenderPresent(renderer);
 			return;
 		}
@@ -415,7 +462,7 @@ struct SDLDriver2 : Driver {
 #ifdef NDEBUG
 		Uint32 flags = SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL;	// | SDL_WINDOW_HIGH_PIXEL_DENSITY;
 #else
-		Uint32 flags = 0;// SDL_WINDOW_OPENGL;	// | SDL_WINDOW_HIGH_PIXEL_DENSITY;
+		Uint32 flags = SDL_WINDOW_OPENGL;	// | SDL_WINDOW_HIGH_PIXEL_DENSITY;
 #endif
 //		int frame = addWindow(1280, 960, 75, flags);
 		int frame = addWindow(1440, 900, 0, flags);
