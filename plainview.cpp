@@ -228,12 +228,12 @@ struct SDLDriver : Driver {
 
 		SDL_Renderer* renderer = sdlFrame.renderer;
 		if (renderer) {
-			const SDL_FRect frect = { dest.x,dest.y,dest.w,dest.h };
+			SDL_FRect frect = { (float)dest.x,(float)dest.y,(float)dest.w,(float)dest.h };
 			SDL_SetRenderDrawColor(renderer, 250, 14, 23, 255);
 			SDL_RenderFillRect(renderer, &frect);
 		}
 
-		const SDL_Rect rect = { dest.x,dest.y,dest.w,dest.h };
+		SDL_Rect rect = { dest.x,dest.y,dest.w,dest.h };
 		SDL_FillSurfaceRect(surface, &rect, c);
 	}
 
@@ -303,7 +303,7 @@ struct SDLDriver : Driver {
 		SDL_SetRenderDrawColor(renderer, 250, 14, 23, 255);
 //		const SDL_FPoint points[] = { 0,0,-10,10,10,0,0,-10 };
 //		int draw = SDL_RenderLines(renderer, points, 4);
-		SDL_FRect rect = {20.0+x, 20.0+x, 100.0, 100.0};
+		SDL_FRect rect = {20.0f+x, 20.0f+x, 100.0f, 100.0f};
 		SDL_RenderFillRect(renderer, &rect);
 
 		SDL_RenderTexture(renderer, texture, NULL, NULL);
@@ -363,12 +363,12 @@ struct SDLDriver : Driver {
 			SDL_Event event;
 			if (SDL_WaitEventTimeout(&event, 5)) {
 				switch (event.type) {
-				case SDL_EVENT_KEY_DOWN:
+				case SDL_EVENT_KEY_DOWN:{
 					SDL_Keysym key = event.key.keysym;
 					if (key.scancode == SDL_SCANCODE_ESCAPE) {
 						running = false;
 					}
-					break;
+					}break;
 				case SDL_EVENT_QUIT:
 					running = false;
 					break;

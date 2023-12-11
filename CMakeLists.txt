@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-add_subdirectory(glfw)
+#add_subdirectory(glfw)
 add_subdirectory(SDL)
 
 project(plainview)
@@ -27,9 +27,9 @@ ADD_EXECUTABLE(plainview
 )
 
 if(WIN32)
-target_link_libraries(plainview glfw SDL3-static)
+target_link_libraries(plainview SDL3-static)
 endif(WIN32)
 
 if(APPLE)
-target_link_libraries(plainview glfw SDL3-static)
+target_link_libraries(plainview SDL3-shared)
 endif(APPLE)

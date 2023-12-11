@@ -1,3 +1,7 @@
+cmake -G Xcode ..
+
+
+
 	void flip(int frame) {
 		SDLFrame& sdlFrame = frames[frame];
 		SDL_Window* window = sdlFrame.window;
