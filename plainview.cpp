@@ -18,6 +18,8 @@ static bool terminateApp = false;
 #include <set>
 
 #include <SDL3/SDL.h>
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 struct Rectangle {
 	int x,y,w,h;
@@ -134,6 +136,212 @@ struct SDLDriver : Driver {
 	Uint32 sdlFlags;
 
 	SDLDriver() {
+		sdlFlags = SDL_INIT_VIDEO;
+		if (SDL_Init(sdlFlags) < 0) {
+			std::cout << "SDL failure" << std::endl;
+			return;
+		}
+		SDL_version version;
+		SDL_GetVersion(&version);
+		std::cout << "SDL " << (int)version.major << "." << (int)version.minor << "." << (int)version.patch << std::endl;
+	}
+
+	void quit() {
+		SDL_QuitSubSystem(sdlFlags);
+	}
+
+	struct SDLFrame {
+		SDL_Window* window;
+		SDL_Surface* surface;
+		SDL_Renderer* renderer;
+		SDL_Texture* texture;
+	};
+
+	std::vector<SDLFrame> frames;
+
+	void closeWindow(int surface) {
+		SDLFrame& sdlFrame = frames[surface];
+		SDL_Window* window = sdlFrame.window;
+		SDL_DestroyWindow(window);
+		SDL_Quit();
+	}
+
+	int addWindow2(int w, int h, int freq, int window_flags) {
+		SDL_Window* window = NULL;
+		window = SDL_CreateWindow("plainview", w, h, window_flags);
+		if (window == NULL) {
+			const char* error = SDL_GetError();
+			std::cout << "could not create window " << error << std::endl;
+			return -1;
+		}
+		const char* name = "nitrologic";
+
+		SDL_Renderer * renderer = SDL_CreateRenderer(window,name, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
+		SDL_Surface * surface = SDL_GetWindowSurface(window);
+
+		//window->format->format
+
+		Uint32 format = 0;
+		SDL_Texture * texture = SDL_CreateTexture(renderer, format, SDL_TEXTUREACCESS_STREAMING, w, h);
+		int frameIndex = (int)frames.size();
+		frames.push_back({ window,surface,renderer,texture });
+		return frameIndex;
+	}
+
+	int addWindow(int w, int h, int freq, int window_flags) {
+		SDL_Window* window = NULL;
+		window = SDL_CreateWindow("plainview", w, h, window_flags);
+		if (window == NULL) {
+			const char* error = SDL_GetError();
+			std::cout << "could not create window " << error << std::endl;
+			return -1;
+		}
+		SDL_Surface* surface = SDL_GetWindowSurface(window);
+		int frameIndex = (int)frames.size();
+		frames.push_back({ window,surface,NULL,NULL });
+		return frameIndex;
+	}
+
+	void clear(int frame) {
+		SDLFrame& sdlFrame = frames[frame];
+		SDL_Surface* surface = sdlFrame.surface;
+		SDL_Renderer* renderer = sdlFrame.renderer;
+		if (renderer) {
+			SDL_RenderClear(renderer);
+			return;
+		}
+
+		RGBA bg = 0x00000000;
+		if (surface) {
+			SDL_FillSurfaceRect(surface, NULL, bg);
+		}
+	}
+
+	void drawQuad(int frame, R dest, RGBA c) {
+		SDLFrame& sdlFrame = frames[frame];
+		SDL_Surface* surface = sdlFrame.surface;
+
+		SDL_Renderer* renderer = sdlFrame.renderer;
+		if (renderer) {
+			const SDL_FRect frect = { dest.x,dest.y,dest.w,dest.h };
+			SDL_SetRenderDrawColor(renderer, 250, 14, 23, 255);
+			SDL_RenderFillRect(renderer, &frect);
+		}
+
+		const SDL_Rect rect = { dest.x,dest.y,dest.w,dest.h };
+		SDL_FillSurfaceRect(surface, &rect, c);
+	}
+
+	void drawPlatter(int frame, int x, int y, int c, int radius, int denominator, int depth, float prot)
+	{
+		double rr = 2 * M_PI / denominator;
+		for (int i = 0; i < denominator; i++) {
+			for (int d = 0; d < depth; d++) {
+				int r = radius + d * 6;
+				int tx = x + r * sin(rr * i + prot);
+				int ty = y + r * cos(rr * i + prot);
+				R dest = { tx,ty,4,2 };
+				drawQuad(frame, dest, c);
+			}
+		}
+	}
+
+	void flip2(int frame) {
+		SDLFrame& sdlFrame = frames[frame];
+		SDL_Window* window = sdlFrame.window;
+		SDL_Renderer* renderer = sdlFrame.renderer;
+		int x = 10 + frameCount % 40;
+//		drawQuad(frame, { x * 10,10,4,4 }, 0xff44cc44);
+//		SDL_Texture* texture = sdlFrame.texture;
+//		int w = frameWidth(frame);
+//		int h = frameHeight(frame);
+//		SDL_RenderTexture(renderer, texture, NULL, NULL);
+//		SDL_SetRenderDrawColor(renderer, 40, 40, 40, 255);
+		SDL_RenderClear(renderer);
+		SDL_SetRenderDrawColor(renderer, 250, 14, 23, 255);
+//		const SDL_FPoint points[] = { 0,0,-10,10,10,0,0,-10 };
+//		int draw = SDL_RenderLines(renderer, points, 4);
+		SDL_FRect rect = {20.0+x, 20.0+x, 100.0, 100.0};
+		SDL_RenderFillRect(renderer, &rect);
+		SDL_RenderPresent(renderer);
+	}
+
+	void flip(int frame) {
+		SDLFrame& sdlFrame = frames[frame];
+		SDL_Window* window = sdlFrame.window;
+		SDL_Renderer* renderer = sdlFrame.renderer;
+
+		int w, h;
+		SDL_GetWindowSize(window, &w, &h);
+		float prot = M_PI_2 * (frameCount & 127) / 256.0;
+
+		drawPlatter(frame, 300, 400, -1, 240, 1024 / 8, 8, prot);
+		drawPlatter(frame, w - 300, 400, -1, 240, 1024 / 8, 8, prot);
+		drawPlatter(frame, 300, 400, -1, 140, 256 / 32, 2, prot);
+		drawPlatter(frame, w - 300, 400, -1, 140, 256 / 32, 2, prot);
+
+		if (renderer)
+		{
+			SDL_RenderPresent(renderer);
+			return;
+		}
+		SDL_UpdateWindowSurface(window);
+	}
+
+	// https://discourse.libsdl.org/t/vsync-while-software-rendering-my-solution/26824
+
+	int test() {
+#ifdef NDEBUG
+		Uint32 flags = SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL;	// | SDL_WINDOW_HIGH_PIXEL_DENSITY;
+#else
+		Uint32 flags = 0;// SDL_WINDOW_OPENGL;	// | SDL_WINDOW_HIGH_PIXEL_DENSITY;
+#endif
+//		int frame = addWindow(1280, 960, 75, flags);
+		int frame = addWindow2(1280, 960, 75, flags);
+		if (frame < 0) {
+			std::cout << "addWindow failure" << std::endl;
+			return -1;
+		}
+
+		bool running = true;
+
+		int surface = frame;
+
+		while (running) {
+			clear(surface);
+			int count = (frameCount++) % 100;
+			int g = count * 2;
+			flip(surface);
+
+			SDL_Event event;
+			if (SDL_WaitEventTimeout(&event, 5)) {
+				switch (event.type) {
+				case SDL_EVENT_KEY_DOWN:
+					SDL_Keysym key = event.key.keysym;
+					if (key.scancode == SDL_SCANCODE_ESCAPE) {
+						running = false;
+					}
+					break;
+				case SDL_EVENT_QUIT:
+					running = false;
+					break;
+				}
+			}
+			SDL_Delay(2);
+//			std::cout << "." << std::endl;
+		}
+
+		closeWindow(frame);
+	}
+};
+
+
+
+struct SDLDriver2 : Driver {
+
+	Uint32 sdlFlags;
+
+	SDLDriver2() {
 		sdlFlags = SDL_INIT_VIDEO;
 		if (SDL_Init(sdlFlags) < 0) {
 			std::cout << "SDL failure" << std::endl;
