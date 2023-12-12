@@ -21,6 +21,12 @@ static bool terminateApp = false;
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+
+#define GLAD_GL_IMPLEMENTATION
+
+#include "glad/gl.h"
+
+
 struct Rectangle {
 	int x,y,w,h;
 	Rectangle() {
@@ -166,6 +172,38 @@ struct SDLDriver : Driver {
 		SDL_Quit();
 	}
 
+    int addWindow3(int w, int h, int freq, int window_flags) {
+        SDL_Window* window = NULL;
+        window = SDL_CreateWindow("plainview", w, h, window_flags | SDL_WINDOW_OPENGL);
+        if (window == NULL) {
+            const char* error = SDL_GetError();
+            std::cout << "could not create window " << error << std::endl;
+            return -1;
+        }
+        
+        SDL_GLContext glContext = SDL_GL_CreateContext(window);
+        
+        int version = gladLoadGL((GLADloadfunc) SDL_GL_GetProcAddress);
+
+/*
+        const char* name = "nitrologic";
+        SDL_Renderer* renderer = SDL_CreateRenderer(window, name, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
+        SDL_Surface * surface = SDL_GetWindowSurface(window);
+
+        //window->format->format
+
+        Uint32 format = 0;
+        SDL_Texture * texture = SDL_CreateTexture(renderer, format, SDL_TEXTUREACCESS_TARGET, w, h);
+
+//        int vsync = SDL_SetWindowTextureVSync(window, 1);
+
+        int vsync = SDL_SetRenderVSync(renderer, 1);
+*/
+        int frameIndex = (int)frames.size();
+        frames.push_back({ window,NULL,NULL,NULL});
+        return frameIndex;
+    }
+    
 	int addWindow2(int w, int h, int freq, int window_flags) {
 		SDL_Window* window = NULL;
 		window = SDL_CreateWindow("plainview", w, h, window_flags);
@@ -277,8 +315,8 @@ struct SDLDriver : Driver {
 		for (int i = 0; i < denominator; i++) {
 			for (int d = 0; d < depth; d++) {
 				int r = radius + d * 6;
-				int tx = x + r * sin(rr * i + prot);
-				int ty = y + r * cos(rr * i + prot);
+				int tx = x + r * sin(rr * i - prot);
+				int ty = y + r * cos(rr * i - prot);
 				R dest = { tx,ty,4,2 };
 				drawQuad(frame, dest, c);
 			}
@@ -311,7 +349,27 @@ struct SDLDriver : Driver {
 		SDL_RenderPresent(renderer);
 	}
 
-	void flip(int frame) {
+    void flip(int frame){
+        SDLFrame& sdlFrame = frames[frame];
+        SDL_Window* window = sdlFrame.window;
+        int w=400;
+        int h=400;
+//        glViewport(0, 0, w,h);
+
+        glClearColor(0.1f, 0.f, 0.4f, 1.f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glEnable(GL_SCISSOR_TEST);
+        glScissor(0,0,20,20);
+        glClearColor(0.8f, 0.8f, 1.f, 1.f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glDisable(GL_SCISSOR_TEST);
+
+        SDL_GL_SwapWindow(window);
+    }
+    
+	void flip1(int frame) {
 		SDLFrame& sdlFrame = frames[frame];
 		SDL_Window* window = sdlFrame.window;
 		SDL_Renderer* renderer = sdlFrame.renderer;
@@ -338,13 +396,16 @@ struct SDLDriver : Driver {
 	// https://discourse.libsdl.org/t/vsync-while-software-rendering-my-solution/26824
 
 	int test() {
+                
+        
 #ifdef NDEBUG
 		Uint32 flags = SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL;	// | SDL_WINDOW_HIGH_PIXEL_DENSITY;
 #else
 		Uint32 flags = 0;// SDL_WINDOW_OPENGL;	// | SDL_WINDOW_HIGH_PIXEL_DENSITY;
 #endif
 //		int frame = addWindow(1280, 960, 75, flags);
-		int frame = addWindow2(1280, 960, 75, flags);
+//		int frame = addWindow2(1280, 960, 75, flags);
+		int frame = addWindow3(3024, 1964, 120, flags);
 		if (frame < 0) {
 			std::cout << "addWindow failure" << std::endl;
 			return -1;
