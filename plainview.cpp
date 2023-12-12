@@ -352,15 +352,19 @@ struct SDLDriver : Driver {
     void flip(int frame){
         SDLFrame& sdlFrame = frames[frame];
         SDL_Window* window = sdlFrame.window;
-        int w=400;
-        int h=400;
-//        glViewport(0, 0, w,h);
+		
+		int x = 10 + frameCount % 400;
+		
 
+		int w, h;
+
+		SDL_GetWindowSizeInPixels(window, &w, &h);
+			
         glClearColor(0.1f, 0.f, 0.4f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         glEnable(GL_SCISSOR_TEST);
-        glScissor(0,0,20,20);
+        glScissor(x,0,2,h);
         glClearColor(0.8f, 0.8f, 1.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT);
 
@@ -439,123 +443,6 @@ struct SDLDriver : Driver {
 //			std::cout << "." << std::endl;
 		}
 
-		closeWindow(frame);
-	}
-};
-
-
-
-struct SDLDriver2 : Driver {
-
-	Uint32 sdlFlags;
-
-	SDLDriver2() {
-		sdlFlags = SDL_INIT_VIDEO;
-		if (SDL_Init(sdlFlags) < 0) {
-			std::cout << "SDL failure" << std::endl;
-			return;
-		}
-		SDL_version version;
-		SDL_GetVersion(&version);
-		std::cout << "SDL " << (int)version.major << "." << (int)version.minor << "." << (int)version.patch << std::endl;
-	}
-
-	void quit() {
-		SDL_QuitSubSystem(sdlFlags);
-	}
-
-	struct SDLFrame {
-		SDL_Window* window;
-		SDL_Surface* surface;
-		SDL_Renderer* renderer;
-	};
-
-	std::vector<SDLFrame> frames;
-
-	void closeWindow(int frame) {
-		SDLFrame& sdlFrame = frames[frame];
-		SDL_Window* window = sdlFrame.window;
-		SDL_DestroyWindow(window);
-		SDL_Quit();
-	}
-
-	int addWindow(int w, int h, int hz, int flags) {
-		SDL_Window* window = NULL;
-		window = SDL_CreateWindow("plainview", w, h, flags);
-		if (window == NULL) {
-			const char* error = SDL_GetError();
-			std::cout << "could not create window " << error << std::endl;
-			return -1;
-		}
-		SDL_Renderer* renderer = SDL_CreateRenderer(window, NULL, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-		SDL_Surface* surface = SDL_GetWindowSurface(window);
-		int result = (int)frames.size();
-		frames.push_back({ window,surface,renderer });
-		return result;
-	}
-
-	void clear(int frame) {
-		SDLFrame& sdlFrame = frames[frame];
-		SDL_Surface* surface = sdlFrame.surface;
-		uint32_t c = 0;
-		SDL_FillSurfaceRect(surface, NULL, c);
-	}
-
-	void drawQuad(int frame, R dest, RGBA c) {
-		SDLFrame& sdlFrame = frames[frame];
-		SDL_Surface* surface = sdlFrame.surface;
-		const SDL_Rect rect = { dest.x,dest.y,dest.w,dest.h };
-		SDL_FillSurfaceRect(surface, &rect, c);
-	}
-
-	void flip(int frame) {
-		SDLFrame& sdlFrame = frames[frame];
-		SDL_Window* window = sdlFrame.window;
-		Uint32 c = 0xffff00ff;
-		int x = 10 + frameCount % 40;
-		drawQuad(frame, { x * 10,10,40,40 }, c);
-		SDL_UpdateWindowSurface(window);
-	}
-
-	// https://discourse.libsdl.org/t/vsync-while-software-rendering-my-solution/26824
-
-	int test() {
-#ifdef NDEBUG
-		Uint32 flags = SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL;	// | SDL_WINDOW_HIGH_PIXEL_DENSITY;
-#else
-		Uint32 flags = SDL_WINDOW_OPENGL;	// | SDL_WINDOW_HIGH_PIXEL_DENSITY;
-#endif
-//		int frame = addWindow(1280, 960, 75, flags);
-		int frame = addWindow(1440, 900, 0, flags);
-		if (frame < 0) {
-			std::cout << "addWindow failure" << std::endl;
-			return -1;
-		}
-
-		bool running = true;
-
-		while (running) {
-			clear(frame);
-			int count = (frameCount++) % 100;
-			int g = count * 2;
-			flip(frame);
-			SDL_Event event;
-			if (SDL_WaitEventTimeout(&event, 5)) {
-				switch (event.type) {
-				case SDL_EVENT_KEY_DOWN:{
-					SDL_Keysym key = event.key.keysym;
-					if (key.scancode == SDL_SCANCODE_ESCAPE) {
-						running = false;
-					}
-					}break;
-				case SDL_EVENT_QUIT:
-					running = false;
-					break;
-				}
-			}
-			SDL_Delay(5);
-			std::cout << "." << std::endl;
-		}
 		closeWindow(frame);
 	}
 };
