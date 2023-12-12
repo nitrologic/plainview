@@ -137,17 +137,6 @@ struct Driver {
 	virtual void quit() = 0;
 };
 
-
-//
-// GL version
-//
-// see SDL_cocoaopengl - (void)movedToNewScreen
-//
-// theory: a new GL context is required to observe monitor refresh rate when dragging window to external monitor
-//
-// https://discourse.libsdl.org/t/sdl-cocoa-update-cvdisplaylink-timing-when-screen-changes/39804
-//
-
 struct SDLDriver : Driver {
 
 	Uint32 sdlFlags;
@@ -183,11 +172,9 @@ struct SDLDriver : Driver {
 		SDL_Quit();
 	}
 
-    // todo: assert ( flags & SDL_WINDOW_OPENGL )
-    
     int addWindow(int w, int h, int freq, int window_flags) {
         SDL_Window* window = NULL;
-        window = SDL_CreateWindow("plainview", w, h, window_flags);
+        window = SDL_CreateWindow("plainview", w, h, window_flags | SDL_WINDOW_OPENGL);
         if (window == NULL) {
             const char* error = SDL_GetError();
             std::cout << "could not create window " << error << std::endl;
@@ -203,17 +190,68 @@ struct SDLDriver : Driver {
     }
     
 	void clear(int frame) {
+		SDLFrame& sdlFrame = frames[frame];
+		SDL_Surface* surface = sdlFrame.surface;
+		SDL_Renderer* renderer = sdlFrame.renderer;
+		if (renderer) {
+			SDL_RenderClear(renderer);
+			return;
+		}
+
+		RGBA bg = 0x00000000;
+		if (surface) {
+			SDL_FillSurfaceRect(surface, NULL, bg);
+		}
 	}
 
 	void drawQuad(int frame, R dest, RGBA c) {
 		SDLFrame& sdlFrame = frames[frame];
+		SDL_Surface* surface = sdlFrame.surface;
+
+		SDL_Renderer* renderer = sdlFrame.renderer;
+		if (renderer) {
+			SDL_FRect frect = { (float)dest.x,(float)dest.y,(float)dest.w,(float)dest.h };
+			SDL_SetRenderDrawColor(renderer, 250, 14, 23, 255);
+			SDL_RenderFillRect(renderer, &frect);
+		}
+
+		SDL_Rect rect = { dest.x,dest.y,dest.w,dest.h };
+		SDL_FillSurfaceRect(surface, &rect, c);
 	}
 
 	static const int MAX_RECT = 8192;
 
 	void drawQuads(int frame, R *dests, RGBA c,const int count) {
 		SDLFrame& sdlFrame = frames[frame];
+		SDL_Surface* surface = sdlFrame.surface;
+
+		SDL_Renderer* renderer = sdlFrame.renderer;
+		if (renderer) {
+			SDL_FRect frect[MAX_RECT];
+			for (int i = 0; i < count; i++) {
+				frect[i].x = dests->x;
+				frect[i].y = dests->y;
+				frect[i].w = dests->w;
+				frect[i].h = dests->h;
+				dests++;
+			}
+			SDL_SetRenderDrawColor(renderer, 250, 14, 23, 255);
+			SDL_RenderFillRects(renderer, frect, count);
+		} 
+		else 
+		{
+			SDL_Rect rect[MAX_RECT];
+			for (int i = 0; i < count; i++) {
+				rect[i].x = dests->x;
+				rect[i].y = dests->y;
+				rect[i].w = dests->w;
+				rect[i].h = dests->h;
+				dests++;
+			}
+			SDL_FillSurfaceRects(surface, rect, count, c);
+		}
 	}
+
 
 	void drawPlatter(int frame, int x, int y, int c, int radius, int denominator, int depth, float prot)
 	{
@@ -229,22 +267,80 @@ struct SDLDriver : Driver {
 		}
 	}
 
+	void flip2(int frame) {
+		SDLFrame& sdlFrame = frames[frame];
+		SDL_Window* window = sdlFrame.window;
+		SDL_Renderer* renderer = sdlFrame.renderer;
+		SDL_Texture* texture = sdlFrame.texture;
+
+
+		int x = 10 + frameCount % 40;
+//		drawQuad(frame, { x * 10,10,4,4 }, 0xff44cc44);
+//		SDL_Texture* texture = sdlFrame.texture;
+//		int w = frameWidth(frame);
+//		int h = frameHeight(frame);
+//		SDL_RenderTexture(renderer, texture, NULL, NULL);
+//		SDL_SetRenderDrawColor(renderer, 40, 40, 40, 255);
+		SDL_RenderClear(renderer);
+		SDL_SetRenderDrawColor(renderer, 250, 14, 23, 255);
+//		const SDL_FPoint points[] = { 0,0,-10,10,10,0,0,-10 };
+//		int draw = SDL_RenderLines(renderer, points, 4);
+		SDL_FRect rect = {20.0f+x, 20.0f+x, 100.0f, 100.0f};
+		SDL_RenderFillRect(renderer, &rect);
+
+		SDL_RenderTexture(renderer, texture, NULL, NULL);
+
+		SDL_RenderPresent(renderer);
+	}
+
     void flip(int frame){
         SDLFrame& sdlFrame = frames[frame];
         SDL_Window* window = sdlFrame.window;
-        int w, h;
+		
+		int x = 10 + frameCount % 400;
+		
+
+		int w, h;
+
 		SDL_GetWindowSizeInPixels(window, &w, &h);
-        int x = 10 + frameCount % 400;
+			
         glClearColor(0.1f, 0.f, 0.4f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT);
+
         glEnable(GL_SCISSOR_TEST);
         glScissor(x,0,2,h);
         glClearColor(0.8f, 0.8f, 1.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT);
+
         glDisable(GL_SCISSOR_TEST);
+
         SDL_GL_SwapWindow(window);
     }
     
+	void flip1(int frame) {
+		SDLFrame& sdlFrame = frames[frame];
+		SDL_Window* window = sdlFrame.window;
+		SDL_Renderer* renderer = sdlFrame.renderer;
+
+		int w, h;
+		SDL_GetWindowSize(window, &w, &h);
+		float prot = M_PI_2 * (frameCount & 127) / 256.0;
+
+		drawPlatter(frame, 300, 400, -1, 240, 1024 / 8, 8, prot);
+		drawPlatter(frame, w - 300, 400, -1, 240, 1024 / 8, 8, prot);
+		drawPlatter(frame, 300, 400, -1, 140, 256 / 32, 2, prot);
+		drawPlatter(frame, w - 300, 400, -1, 140, 256 / 32, 2, prot);
+
+		if (renderer)
+		{
+			SDL_Texture* texture = sdlFrame.texture;
+			SDL_RenderTexture(renderer, texture, NULL, NULL);
+			SDL_RenderPresent(renderer);
+			return;
+		}
+		SDL_UpdateWindowSurface(window);
+	}
+
 	// https://discourse.libsdl.org/t/vsync-while-software-rendering-my-solution/26824
 
 	int test() {
@@ -253,7 +349,7 @@ struct SDLDriver : Driver {
 #ifdef NDEBUG
 		Uint32 flags = SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL;	// | SDL_WINDOW_HIGH_PIXEL_DENSITY;
 #else
-		Uint32 flags = SDL_WINDOW_OPENGL;	// | SDL_WINDOW_HIGH_PIXEL_DENSITY;
+		Uint32 flags = 0;// SDL_WINDOW_OPENGL;	// | SDL_WINDOW_HIGH_PIXEL_DENSITY;
 #endif
 //		int frame = addWindow(1280, 960, 75, flags);
 		int frame = addWindow(1280, 800, 75, flags);
