@@ -17,15 +17,33 @@ static bool terminateApp = false;
 #include <vector>
 #include <set>
 
+
+#define GLAD_GL_IMPLEMENTATION
+#include "glad/gl.h"
+
 #include <SDL3/SDL.h>
+//#include <SDL3/SDL_opengl.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+#include <sys/time.h>
 
-#define GLAD_GL_IMPLEMENTATION
-
-#include "glad/gl.h"
-
+uint64_t cpuTime() {
+    uint64_t micros;
+#ifdef WIN32
+    LARGE_INTEGER frequency;
+    LARGE_INTEGER count;
+    QueryPerformanceFrequency(&frequency);
+    QueryPerformanceCounter(&count);
+    micros = (count.QuadPart * (uint64_t)1e6) / frequency.QuadPart;
+#endif
+#ifdef __APPLE__
+    timeval tv;
+    gettimeofday( &tv, nullptr );
+    micros=tv.tv_sec*1000000ULL +tv.tv_usec;
+#endif
+    return micros;
+}
 
 struct Rectangle {
 	int x,y,w,h;
@@ -247,14 +265,31 @@ struct SDLDriver : Driver {
     
 	// https://discourse.libsdl.org/t/vsync-while-software-rendering-my-solution/26824
 
-	int test() {
-                
+	int fps;
+    int fpsFrames=0;
+    uint64_t frameTime=cpuTime();
         
+    void updateFPS(){
+        fpsFrames++;
+        if(fpsFrames>=40){
+            uint64_t t=cpuTime();
+            double elapsed = (t-frameTime)/1e6;
+            frameTime=t;
+            fps= (0.5 + (fpsFrames / elapsed));
+            fpsFrames=0;
+            std::cout << "fps:" << fps << std::endl;
+        }
+    }
+
+	int test() {
+        Uint32 flags = SDL_WINDOW_OPENGL;    // | SDL_WINDOW_HIGH_PIXEL_DENSITY;
+/*
 #ifdef NDEBUG
 		Uint32 flags = SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL;	// | SDL_WINDOW_HIGH_PIXEL_DENSITY;
 #else
 		Uint32 flags = SDL_WINDOW_OPENGL;	// | SDL_WINDOW_HIGH_PIXEL_DENSITY;
 #endif
+*/
 //		int frame = addWindow(1280, 960, 75, flags);
 		int frame = addWindow(1280, 800, 75, flags);
 //		int frame = addWindow(3024, 1964, 120, flags);
@@ -272,6 +307,8 @@ struct SDLDriver : Driver {
 			int count = (frameCount++) % 100;
 			int g = count * 2;
 			flip(surface);
+            
+            updateFPS();
 
 			SDL_Event event;
 //            if (SDL_WaitEventTimeout(&event, 5)) {

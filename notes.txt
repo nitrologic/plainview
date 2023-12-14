@@ -1,3 +1,28 @@
+- (void)movedToNewScreen
+{
+    if (self->displayLink) {
+        SDL_CocoaWindowData *windowData = (__bridge SDL_CocoaWindowData *)self->window->driverdata;
+        NSScreen *screen = [[windowData nswindow] screen];
+        const CGDirectDisplayID displayID = [[screen.deviceDescription objectForKey:@"NSScreenNumber"] unsignedIntValue];
+        int success2 = CVDisplayLinkSetCurrentCGDisplay(self->displayLink, displayID);
+
+        if( success2 == kCVReturnSuccess ){
+            NSLog(@"movedToNewScreen CVDisplayLinkSetCurrentCGDisplay Success displayID = %i",displayID);
+        }else{
+            NSLog(@"movedToNewScreen CVDisplayLinkSetCurrentCGDisplay Fail");
+        }
+/*
+        int success = CVDisplayLinkSetCurrentCGDisplayFromOpenGLContext(self->displayLink, [self CGLContextObj], [[self openglPixelFormat] CGLPixelFormatObj]);
+        if(success==kCVReturnSuccess){
+            NSLog(@"movedToNewScreen CVDisplayLink Success");
+        }else{
+            NSLog(@"movedToNewScreen CVDisplayLink Fail");
+        }
+*/
+    }
+}
+
+
 CVDisplayLinkSetCurrentCGDisplay patch for SDL_cocoaopengl movedToNewScreen
 
 - (void)movedToNewScreen
