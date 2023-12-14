@@ -1,3 +1,33 @@
+CVDisplayLinkSetCurrentCGDisplay patch for SDL_cocoaopengl movedToNewScreen
+
+- (void)movedToNewScreen
+{
+    if (self->displayLink) {
+        SDL_CocoaWindowData *windowData = (__bridge SDL_CocoaWindowData *)self->window->driverdata;
+        NSScreen *screen = [[windowData nswindow] screen];
+        const CGDirectDisplayID displayID = [[screen.deviceDescription objectForKey:@"NSScreenNumber"] unsignedIntValue];
+
+        int success2 = CVDisplayLinkSetCurrentCGDisplay(self->displayLink, displayID);
+        if( success2 == kCVReturnSuccess ){
+            NSLog(@"movedToNewScreen CVDisplayLinkSetCurrentCGDisplay Success");
+        }else{
+            NSLog(@"movedToNewScreen CVDisplayLinkSetCurrentCGDisplay Fail");
+        }
+
+        int success = CVDisplayLinkSetCurrentCGDisplayFromOpenGLContext(self->displayLink, [self CGLContextObj], [[self openglPixelFormat] CGLPixelFormatObj]);
+        if(success==kCVReturnSuccess){
+            NSLog(@"movedToNewScreen CVDisplayLink Success");
+        }else{
+            NSLog(@"movedToNewScreen CVDisplayLink Fail");
+        }
+    }
+}
+
+
+This is a dictionary containing the attributes of the receiver's screen. For the list of keys you can use to retrieve values from the returned dictionary, see Display Device—Descriptions.
+
+In addition to the display device constants described in NSWindow, you can also retrieve the CGDirectDisplayID value associated with the screen from this dictionary. To access this value, specify the Objective-C string @"NSScreenNumber" as the key when requesting the item from the dictionary. The value associated with this key is an NSNumber object containing the display ID value. This string is only valid when used as a key for the dictionary returned by this method.
+
 	1x 120 Hz
 		3024 x 1964
 		3024 x 1890
