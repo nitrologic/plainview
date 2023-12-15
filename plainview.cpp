@@ -17,7 +17,6 @@ static bool terminateApp = false;
 #include <vector>
 #include <set>
 
-
 #define GLAD_GL_IMPLEMENTATION
 #include "glad/gl.h"
 
@@ -26,7 +25,14 @@ static bool terminateApp = false;
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+#ifdef WIN32
+#define WIN32_LEAN_AND_MEAN 
+#include <windows.h>
+#include <profileapi.h>
+#endif
+#ifdef __APPLE__
 #include <sys/time.h>
+#endif
 
 uint64_t cpuTime() {
     uint64_t micros;
@@ -45,12 +51,12 @@ uint64_t cpuTime() {
     return micros;
 }
 
-struct Rectangle {
+struct Rect32 {
 	int x,y,w,h;
-	Rectangle() {
+	Rect32() {
 		x = y = w = h = 0;
 	}
-	Rectangle(int left,int top,int width,int height) {
+	Rect32(int left,int top,int width,int height) {
 		x = left;
 		y = top;
 		w = width;
@@ -82,7 +88,7 @@ typedef std::string S;
 typedef float F;
 
 typedef uint32_t RGBA;
-typedef Rectangle R;
+typedef Rect32 R;
 
 struct Monitor {
 	S driver;
@@ -262,6 +268,12 @@ struct SDLDriver : Driver {
         glDisable(GL_SCISSOR_TEST);
         SDL_GL_SwapWindow(window);
     }
+
+	void fullscreen(int frame) {
+		SDLFrame& sdlFrame = frames[frame];
+		SDL_Window* window = sdlFrame.window;
+		SDL_SetWindowFullscreen(window, true);
+	}
     
 	// https://discourse.libsdl.org/t/vsync-while-software-rendering-my-solution/26824
 
@@ -282,7 +294,7 @@ struct SDLDriver : Driver {
     }
 
 	int test() {
-        Uint32 flags = SDL_WINDOW_OPENGL;    // | SDL_WINDOW_HIGH_PIXEL_DENSITY;
+        Uint32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;    // | SDL_WINDOW_HIGH_PIXEL_DENSITY;
 /*
 #ifdef NDEBUG
 		Uint32 flags = SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL;	// | SDL_WINDOW_HIGH_PIXEL_DENSITY;
@@ -314,6 +326,9 @@ struct SDLDriver : Driver {
 //            if (SDL_WaitEventTimeout(&event, 5)) {
 			if (SDL_PollEvent(&event)) {
 				switch (event.type) {
+				case SDL_EVENT_WINDOW_MAXIMIZED: {
+					fullscreen(0);
+				}break;
 				case SDL_EVENT_KEY_DOWN:{
 					SDL_Keysym key = event.key.keysym;
 					if (key.scancode == SDL_SCANCODE_ESCAPE) {
