@@ -12,30 +12,6 @@ All Rights Reserved
 
 const char *plainviewVersion = "0.3";
 
-/*
-
-	* display device management courtesy SDL3 
-	* OpenGL bindings courtesy Glad Loader-Generator 
-	* SDL_CocoaOpenGL movedToNewScreen patch courtesy Simon Armstrong
-
-
-- (void)movedToNewScreen
-{
-	if (self->displayLink) {
-		SDL_CocoaWindowData *windowData = (__bridge SDL_CocoaWindowData *)self->window->driverdata;
-		NSScreen *screen = [[windowData nswindow] screen];
-		const CGDirectDisplayID displayID = [[screen.deviceDescription objectForKey:@"NSScreenNumber"] unsignedIntValue];
-		int success = CVDisplayLinkSetCurrentCGDisplay(self->displayLink, displayID);
-		if (success==kCVReturnSuccess){
-			NSLog(@"movedToNewScreen CVDisplayLink Success displayID:%i", displayID);
-		}else{
-			NSLog(@"movedToNewScreen CVDisplayLink Fail displayID:%i", displayID);
-		}
-	}
-}
-
-*/
-
 static bool terminateApp = false;
 
 #include <iostream>

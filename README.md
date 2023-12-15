@@ -1,6 +1,10 @@
 # plainview
 
-a plain view of the modern monitor video display landscape
+A plain view of the modern monitor video display landscape
+
+	* display device management courtesy SDL3 
+	* OpenGL bindings courtesy Glad Loader-Generator 
+	* SDL_CocoaOpenGL movedToNewScreen patch courtesy Simon Armstrong
 
 ## Latest
 
