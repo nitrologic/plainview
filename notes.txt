@@ -22,6 +22,16 @@
     }
 }
 
+//
+// GL version
+//
+// see SDL_cocoaopengl - (void)movedToNewScreen
+//
+// theory: a new GL context is required to observe monitor refresh rate when dragging window to external monitor
+//
+// https://discourse.libsdl.org/t/sdl-cocoa-update-cvdisplaylink-timing-when-screen-changes/39804
+//
+
 
 CVDisplayLinkSetCurrentCGDisplay patch for SDL_cocoaopengl movedToNewScreen
 

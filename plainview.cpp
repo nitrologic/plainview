@@ -2,13 +2,39 @@
 
 plainview.cpp
 
+A plain view of the modern monitor video display landscape
+
 Copyright © 2023 Simon Armstrong
 
 All Rights Reserved
 
 */
 
-const char *plainviewVersion = "0.2";
+const char *plainviewVersion = "0.3";
+
+/*
+
+	* display device management courtesy SDL3 
+	* OpenGL bindings courtesy Glad Loader-Generator 
+	* SDL_CocoaOpenGL movedToNewScreen patch courtesy Simon Armstrong
+
+
+- (void)movedToNewScreen
+{
+	if (self->displayLink) {
+		SDL_CocoaWindowData *windowData = (__bridge SDL_CocoaWindowData *)self->window->driverdata;
+		NSScreen *screen = [[windowData nswindow] screen];
+		const CGDirectDisplayID displayID = [[screen.deviceDescription objectForKey:@"NSScreenNumber"] unsignedIntValue];
+		int success = CVDisplayLinkSetCurrentCGDisplay(self->displayLink, displayID);
+		if (success==kCVReturnSuccess){
+			NSLog(@"movedToNewScreen CVDisplayLink Success displayID:%i", displayID);
+		}else{
+			NSLog(@"movedToNewScreen CVDisplayLink Fail displayID:%i", displayID);
+		}
+	}
+}
+
+*/
 
 static bool terminateApp = false;
 
@@ -35,20 +61,20 @@ static bool terminateApp = false;
 #endif
 
 uint64_t cpuTime() {
-    uint64_t micros;
+	uint64_t micros;
 #ifdef WIN32
-    LARGE_INTEGER frequency;
-    LARGE_INTEGER count;
-    QueryPerformanceFrequency(&frequency);
-    QueryPerformanceCounter(&count);
-    micros = (count.QuadPart * (uint64_t)1e6) / frequency.QuadPart;
+	LARGE_INTEGER frequency;
+	LARGE_INTEGER count;
+	QueryPerformanceFrequency(&frequency);
+	QueryPerformanceCounter(&count);
+	micros = (count.QuadPart * (uint64_t)1e6) / frequency.QuadPart;
 #endif
 #ifdef __APPLE__
-    timeval tv;
-    gettimeofday( &tv, nullptr );
-    micros=tv.tv_sec*1000000ULL +tv.tv_usec;
+	timeval tv;
+	gettimeofday( &tv, nullptr );
+	micros=tv.tv_sec*1000000ULL +tv.tv_usec;
 #endif
-    return micros;
+	return micros;
 }
 
 struct Rect32 {
@@ -154,23 +180,17 @@ struct Driver {
 	virtual int test() = 0;
 	virtual int addWindow(int w, int h, int hz, int flags) = 0;
 	virtual void closeWindow(int frame) = 0;
-
 	virtual void clear(int frame) = 0;
 	virtual void drawQuad(int frame, R dest,RGBA c) = 0;
 	virtual void flip(int frame) = 0;
 	virtual void quit() = 0;
 };
 
+struct QuadDriver : Driver {
+	virtual void drawQuad(int frame, R dest, RGBA c) {
 
-//
-// GL version
-//
-// see SDL_cocoaopengl - (void)movedToNewScreen
-//
-// theory: a new GL context is required to observe monitor refresh rate when dragging window to external monitor
-//
-// https://discourse.libsdl.org/t/sdl-cocoa-update-cvdisplaylink-timing-when-screen-changes/39804
-//
+	}
+};
 
 struct SDLDriver : Driver {
 
@@ -207,25 +227,25 @@ struct SDLDriver : Driver {
 		SDL_Quit();
 	}
 
-    // todo: assert ( flags & SDL_WINDOW_OPENGL )
-    
-    int addWindow(int w, int h, int freq, int window_flags) {
-        SDL_Window* window = NULL;
-        window = SDL_CreateWindow("plainview", w, h, window_flags);
-        if (window == NULL) {
-            const char* error = SDL_GetError();
-            std::cout << "could not create window " << error << std::endl;
-            return -1;
-        }
-        
-        SDL_GLContext glContext = SDL_GL_CreateContext(window);
-        int version = gladLoadGL((GLADloadfunc) SDL_GL_GetProcAddress);
-        SDL_GL_SetSwapInterval(1);
-        int frameIndex = (int)frames.size();
-        frames.push_back({ window,NULL,NULL,NULL});
-        return frameIndex;
-    }
-    
+	// todo: assert ( flags & SDL_WINDOW_OPENGL )
+	
+	int addWindow(int w, int h, int freq, int window_flags) {
+		SDL_Window* window = NULL;
+		window = SDL_CreateWindow("plainview", w, h, window_flags);
+		if (window == NULL) {
+			const char* error = SDL_GetError();
+			std::cout << "could not create window " << error << std::endl;
+			return -1;
+		}
+		
+		SDL_GLContext glContext = SDL_GL_CreateContext(window);
+		int version = gladLoadGL((GLADloadfunc) SDL_GL_GetProcAddress);
+		SDL_GL_SetSwapInterval(1);
+		int frameIndex = (int)frames.size();
+		frames.push_back({ window,NULL,NULL,NULL});
+		return frameIndex;
+	}
+	
 	void clear(int frame) {
 	}
 
@@ -253,48 +273,52 @@ struct SDLDriver : Driver {
 		}
 	}
 
-    void flip(int frame){
-        SDLFrame& sdlFrame = frames[frame];
-        SDL_Window* window = sdlFrame.window;
-        int w, h;
+	void flip(int frame){
+		SDLFrame& sdlFrame = frames[frame];
+		SDL_Window* window = sdlFrame.window;
+		int w, h;
 		SDL_GetWindowSizeInPixels(window, &w, &h);
-        int x = 10 + frameCount % 400;
-        glClearColor(0.1f, 0.f, 0.4f, 1.f);
-        glClear(GL_COLOR_BUFFER_BIT);
-        glEnable(GL_SCISSOR_TEST);
-        glScissor(x,0,2,h);
-        glClearColor(0.8f, 0.8f, 1.f, 1.f);
-        glClear(GL_COLOR_BUFFER_BIT);
-        glDisable(GL_SCISSOR_TEST);
-        SDL_GL_SwapWindow(window);
-    }
+		int period = 23;
+		int x = 10 + frameCount % period;
+		glClearColor(0.1f, 0.f, 0.4f, 1.f);
+		glClear(GL_COLOR_BUFFER_BIT);
+		glEnable(GL_SCISSOR_TEST);
+		while (x < w) {
+			glScissor(x, 0, 2, h);
+			glClearColor(0.8f, 0.8f, 1.f, 1.f);
+			glClear(GL_COLOR_BUFFER_BIT);
+			x += period;
+		}
+		glDisable(GL_SCISSOR_TEST);
+		SDL_GL_SwapWindow(window);
+	}
 
 	void fullscreen(int frame) {
 		SDLFrame& sdlFrame = frames[frame];
 		SDL_Window* window = sdlFrame.window;
 		SDL_SetWindowFullscreen(window, true);
 	}
-    
+	
 	// https://discourse.libsdl.org/t/vsync-while-software-rendering-my-solution/26824
 
 	int fps;
-    int fpsFrames=0;
-    uint64_t frameTime=cpuTime();
-        
-    void updateFPS(){
-        fpsFrames++;
-        if(fpsFrames>=40){
-            uint64_t t=cpuTime();
-            double elapsed = (t-frameTime)/1e6;
-            frameTime=t;
-            fps= (0.5 + (fpsFrames / elapsed));
-            fpsFrames=0;
-            std::cout << "fps:" << fps << std::endl;
-        }
-    }
+	int fpsFrames=0;
+	uint64_t frameTime=cpuTime();
+		
+	void updateFPS(){
+		fpsFrames++;
+		if(fpsFrames>=40){
+			uint64_t t=cpuTime();
+			double elapsed = (t-frameTime)/1e6;
+			frameTime=t;
+			fps= (0.5 + (fpsFrames / elapsed));
+			fpsFrames=0;
+			std::cout << "fps:" << fps << std::endl;
+		}
+	}
 
 	int test() {
-        Uint32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;    // | SDL_WINDOW_HIGH_PIXEL_DENSITY;
+		Uint32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;    // | SDL_WINDOW_HIGH_PIXEL_DENSITY;
 /*
 #ifdef NDEBUG
 		Uint32 flags = SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL;	// | SDL_WINDOW_HIGH_PIXEL_DENSITY;
@@ -319,8 +343,8 @@ struct SDLDriver : Driver {
 			int count = (frameCount++) % 100;
 			int g = count * 2;
 			flip(surface);
-            
-            updateFPS();
+			
+			updateFPS();
 
 			SDL_Event event;
 //            if (SDL_WaitEventTimeout(&event, 5)) {
