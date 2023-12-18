@@ -168,6 +168,161 @@ struct QuadDriver : Driver {
 	}
 };
 
+#include <fstream>
+#include <sstream>
+
+typedef std::string S;
+
+S loadString(S path) {
+	std::ifstream ifs(path);
+	if (!ifs.is_open()) {
+		return "";
+	}
+	std::stringstream buffer;
+	buffer << ifs.rdbuf();
+	return buffer.str();
+}
+
+
+typedef GLint i32;
+typedef GLuint u32;
+typedef GLchar c8;
+typedef GLenum E;
+
+
+
+struct GLProgram {
+
+	i32 program1 = 0;
+
+	int check() {
+		E error = glGetError();
+		if (error) {
+			std::cout << "GL Error " << error << std::endl;
+			abort();
+		}
+		return error;
+	}
+
+	i32 attribute( const char *name) {
+		i32 a = glGetAttribLocation(program1, name);
+		check();
+		return a;
+	}
+
+	i32 uniform(const char* name) {
+		i32 a = glGetUniformLocation(program1, name);
+		check();
+		return a;
+	}
+
+
+	int build() {
+		program1 = loadProgram();
+		i32 a0 = attribute("xyzc");
+		i32 u0 = uniform("handles");
+		i32 u1 = uniform("view");
+		i32 u2 = uniform("palette");
+		return 0;
+	}
+
+	i32 loadProgram() {
+		std::string vertexGles = loadString("../shaders/rayVertex.gles");
+		i32 shader1 = loadShader(GL_VERTEX_SHADER, vertexGles.data(), vertexGles.length());
+		check();
+		std::string fragmentGles = loadString("../shaders/rayFragment.gles");
+		i32 shader2 = loadShader(GL_FRAGMENT_SHADER, fragmentGles.data(), fragmentGles.length());
+		check();
+
+		i32 program1 = glCreateProgram();
+		glAttachShader(program1, shader1);
+		glAttachShader(program1, shader2);
+		check();
+
+		glLinkProgram(program1);
+		check();
+
+		int status[4];
+		glGetProgramiv(program1, GL_LINK_STATUS, status);
+
+		if (status[0] == 0) {
+			int status2[4];
+			glGetProgramiv(program1, GL_INFO_LOG_LENGTH, status2);
+			if (status2[0]) {
+				i32 size = 0;
+				c8 log[4096];
+				glGetProgramInfoLog(program1, status2[0], &size, log);
+				if (size) {
+					std::cout << "program info log : " << std::string(log, size) << std::endl;
+				}
+			}
+			glDeleteProgram(program1);
+			return 0;
+		}
+
+		return program1;
+	}
+
+	i32 loadShader(GLenum shaderType,char *src, int bytes) {
+		u32 shader = glCreateShader(shaderType);
+		const c8* sources[] = { src,0 };
+		i32 lengths[] = {bytes,0};
+		glShaderSource(shader, 1, sources, lengths);
+		glCompileShader(shader);
+		check();
+		int status[4];
+		glGetShaderiv(shader, GL_COMPILE_STATUS, status);
+		if (status[0] == 0) {
+			int status2[4];
+			glGetShaderiv(shader, GL_INFO_LOG_LENGTH, status2);
+			if (status2[0]) {
+				i32 size = 0;
+				c8 log[4096];
+				glGetShaderInfoLog(shader, status2[0], &size, log);
+				if (size) {
+					std::cout << "shader info log : " << std::string(log, size) << std::endl;
+				}
+			}
+			glDeleteShader(shader);
+			return 0;
+		}
+		check();
+		return shader;
+	}
+
+};
+
+struct GLEngine {
+
+	int test() {
+		GLProgram p;
+		p.build();
+		return 0;
+	}
+};
+
+/*
+constructor(gl, source, shaderType, uri) {
+			const shader = gl.createShader(shaderType);
+			gl.shaderSource(shader, source);
+			gl.compileShader(shader);
+			const success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+			if (success) {
+				this.shader = shader;
+			}
+			else {
+				const info = gl.getShaderInfoLog(shader);
+				console.error("Could not compile WebGL shader", uri);
+				console.error(info);
+				const split = info.split(":");
+				if (split[0] == "ERROR") {
+					this.error = split;
+				}
+				gl.deleteShader(shader);
+			}
+		}
+*/
+
 struct SDLDriver : Driver {
 
 	Uint32 sdlFlags;
@@ -309,6 +464,10 @@ struct SDLDriver : Driver {
 			std::cout << "addWindow failure" << std::endl;
 			return -1;
 		}
+
+
+		GLEngine e;
+		e.test();
 
 		bool running = true;
 
