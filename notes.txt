@@ -1,3 +1,5 @@
+https://registry.khronos.org/OpenGL/specs/gl/GLSLangSpec.4.10.pdf
+
 /*
 
 	* display device management courtesy SDL3 
@@ -5,7 +7,6 @@
 	* SDL_CocoaOpenGL movedToNewScreen patch courtesy Simon Armstrong
 
 */
-
 
 - (void)movedToNewScreen
 {

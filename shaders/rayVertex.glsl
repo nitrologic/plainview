@@ -1,9 +1,9 @@
-#version 300 es
+#version 410
 
-uniform highp mat4 view;
-uniform lowp vec4 palette[16];
-uniform lowp ivec4 style[16];
-uniform mediump mat4 handles[32];
+uniform mat4 view;
+uniform vec4 palette[16];
+uniform ivec4 style[16];
+uniform mat4 handles[32];
 
 in ivec4 xyzc;
 out vec4 color;
@@ -11,8 +11,7 @@ out vec4 color;
 void main(){
 	int w=int(xyzc.w);
 	color=palette[w&15];
-	int scope=gl_InstanceID;
-	mat4 model=handles[scope];
+	mat4 model=handles[0];
 	vec4 v=vec4(xyzc.x,xyzc.y,xyzc.z,1.0);
 	v=v*model;
 	v=v*view;

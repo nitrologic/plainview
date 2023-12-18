@@ -227,10 +227,10 @@ struct GLProgram {
 	}
 
 	i32 loadProgram() {
-		std::string vertexGles = loadString("../shaders/rayVertex.gles");
+		std::string vertexGles = loadString("../../shaders/rayVertex.glsl");
 		i32 shader1 = loadShader(GL_VERTEX_SHADER, vertexGles.data(), vertexGles.length());
 		check();
-		std::string fragmentGles = loadString("../shaders/rayFragment.gles");
+		std::string fragmentGles = loadString("../../shaders/rayFragment.glsl");
 		i32 shader2 = loadShader(GL_FRAGMENT_SHADER, fragmentGles.data(), fragmentGles.length());
 		check();
 
@@ -295,6 +295,10 @@ struct GLProgram {
 struct GLEngine {
 
 	int test() {
+
+        const char* version = (const char *)glGetString(GL_SHADING_LANGUAGE_VERSION);
+        std::cout << "GL_SHADING_LANGUAGE_VERSION : " << version << std::endl;
+
 		GLProgram p;
 		p.build();
 		return 0;
@@ -327,16 +331,21 @@ struct SDLDriver : Driver {
 
 	Uint32 sdlFlags;
 
-	SDLDriver() {
-		sdlFlags = SDL_INIT_VIDEO;
-		if (SDL_Init(sdlFlags) < 0) {
-			std::cout << "SDL failure" << std::endl;
-			return;
-		}
-		SDL_version version;
-		SDL_GetVersion(&version);
-		std::cout << "SDL " << (int)version.major << "." << (int)version.minor << "." << (int)version.patch << std::endl;
-	}
+    SDLDriver() {
+        sdlFlags = SDL_INIT_VIDEO;
+        if (SDL_Init(sdlFlags) < 0) {
+            std::cout << "SDL failure" << std::endl;
+            return;
+        }
+        SDL_version version;
+        SDL_GetVersion(&version);
+        std::cout << "SDL " << (int)version.major << "." << (int)version.minor << "." << (int)version.patch << std::endl;
+        
+        
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    }
 
 	void quit() {
 		SDL_QuitSubSystem(sdlFlags);
