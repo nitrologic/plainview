@@ -23,7 +23,6 @@ static bool terminateApp = false;
 #include "glad/gl.h"
 
 #include <SDL3/SDL.h>
-//#include <SDL3/SDL_opengl.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -173,15 +172,6 @@ struct QuadDriver : Driver {
 
 typedef std::string S;
 
-S loadString(S path) {
-	std::ifstream ifs(path);
-	if (!ifs.is_open()) {
-		return "";
-	}
-	std::stringstream buffer;
-	buffer << ifs.rdbuf();
-	return buffer.str();
-}
 
 
 typedef GLint i32;
@@ -192,8 +182,19 @@ typedef GLenum E;
 
 
 struct GLProgram {
-
 	i32 program1 = 0;
+// ifdef macos
+	S root = "../";
+
+	S loadString(S path) {
+		std::ifstream ifs(root+path);
+		if (!ifs.is_open()) {
+			return "";
+		}
+		std::stringstream buffer;
+		buffer << ifs.rdbuf();
+		return buffer.str();
+	}
 
 	int check() {
 		E error = glGetError();
@@ -227,10 +228,10 @@ struct GLProgram {
 	}
 
 	i32 loadProgram() {
-		std::string vertexGles = loadString("../shaders/rayVertex.gles");
+		std::string vertexGles = loadString("shaders/rayVertex.gles");
 		i32 shader1 = loadShader(GL_VERTEX_SHADER, vertexGles.data(), vertexGles.length());
 		check();
-		std::string fragmentGles = loadString("../shaders/rayFragment.gles");
+		std::string fragmentGles = loadString("shaders/rayFragment.gles");
 		i32 shader2 = loadShader(GL_FRAGMENT_SHADER, fragmentGles.data(), fragmentGles.length());
 		check();
 
@@ -359,7 +360,7 @@ struct SDLDriver : Driver {
 	}
 
 	// todo: assert ( flags & SDL_WINDOW_OPENGL )
-	
+
 	int addWindow(int w, int h, int freq, int window_flags) {
 		SDL_Window* window = NULL;
 		window = SDL_CreateWindow("plainview", w, h, window_flags);
@@ -368,15 +369,15 @@ struct SDLDriver : Driver {
 			std::cout << "could not create window " << error << std::endl;
 			return -1;
 		}
-		
+
 		SDL_GLContext glContext = SDL_GL_CreateContext(window);
-		int version = gladLoadGL((GLADloadfunc) SDL_GL_GetProcAddress);
+		int version = gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress);
 		SDL_GL_SetSwapInterval(1);
 		int frameIndex = (int)frames.size();
-		frames.push_back({ window,NULL,NULL,NULL});
+		frames.push_back({ window,NULL,NULL,NULL });
 		return frameIndex;
 	}
-	
+
 	void clear(int frame) {
 	}
 
@@ -386,7 +387,7 @@ struct SDLDriver : Driver {
 
 	static const int MAX_RECT = 8192;
 
-	void drawQuads(int frame, R *dests, RGBA c,const int count) {
+	void drawQuads(int frame, R* dests, RGBA c, const int count) {
 		SDLFrame& sdlFrame = frames[frame];
 	}
 
@@ -404,18 +405,19 @@ struct SDLDriver : Driver {
 		}
 	}
 
-	void flip(int frame){
+	void flip(int frame) {
 		SDLFrame& sdlFrame = frames[frame];
 		SDL_Window* window = sdlFrame.window;
 		int w, h;
 		SDL_GetWindowSizeInPixels(window, &w, &h);
-		int period = 23;
+		int period = 48;
+		int wide = 7;
 		int x = 10 + frameCount % period;
 		glClearColor(0.1f, 0.f, 0.4f, 1.f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glEnable(GL_SCISSOR_TEST);
 		while (x < w) {
-			glScissor(x, 0, 2, h);
+			glScissor(x, 0, wide, h);
 			glClearColor(0.8f, 0.8f, 1.f, 1.f);
 			glClear(GL_COLOR_BUFFER_BIT);
 			x += period;
@@ -424,10 +426,21 @@ struct SDLDriver : Driver {
 		SDL_GL_SwapWindow(window);
 	}
 
-	void fullscreen(int frame) {
+	enum fullscreenMode {
+		WINDOWED,
+		FULLSCREEN,
+		TOGGLE_FULLSCREEN
+	};
+
+	void fullscreen(int frame, fullscreenMode mode) {
 		SDLFrame& sdlFrame = frames[frame];
 		SDL_Window* window = sdlFrame.window;
-		SDL_SetWindowFullscreen(window, true);
+		if (mode == TOGGLE_FULLSCREEN){
+//			SDL_GetWindowFullscreenMode(window):
+			auto flags = SDL_GetWindowFlags(window);
+			mode = flags & SDL_WINDOW_FULLSCREEN ? WINDOWED : FULLSCREEN;
+		}
+		SDL_SetWindowFullscreen(window, mode?true:false);
 	}
 	
 	// https://discourse.libsdl.org/t/vsync-while-software-rendering-my-solution/26824
@@ -464,33 +477,29 @@ struct SDLDriver : Driver {
 			std::cout << "addWindow failure" << std::endl;
 			return -1;
 		}
-
-
 		GLEngine e;
 		e.test();
-
 		bool running = true;
-
 		int surface = frame;
-
 		while (running) {
 //			clear(surface);
 			int count = (frameCount++) % 100;
 			int g = count * 2;
 			flip(surface);
-			
 			updateFPS();
-
 			SDL_Event event;
 //            if (SDL_WaitEventTimeout(&event, 5)) {
 			if (SDL_PollEvent(&event)) {
 				switch (event.type) {
 				case SDL_EVENT_WINDOW_MAXIMIZED: {
-					fullscreen(0);
+					fullscreen(0,FULLSCREEN);
 				}break;
 				case SDL_EVENT_KEY_DOWN:{
 					SDL_Keysym key = event.key.keysym;
-					if (key.scancode == SDL_SCANCODE_ESCAPE) {
+					if (key.scancode == SDL_SCANCODE_F1) {
+						fullscreen(0,TOGGLE_FULLSCREEN);
+					}
+					if (key.scancode == SDL_SCANCODE_F10) {
 						running = false;
 					}
 					}break;
@@ -509,7 +518,6 @@ struct SDLDriver : Driver {
 
 Driver *sdlOpen() {
 	SDLDriver *driver = new SDLDriver();
-
 	int displayCount;
  	SDL_DisplayID* sdlDisplays = SDL_GetDisplays(&displayCount);
 	for(int i=0;i<displayCount;i++){
