@@ -172,23 +172,78 @@ struct QuadDriver : Driver {
 
 typedef std::string S;
 
-
-
 typedef GLint i32;
 typedef GLuint u32;
 typedef GLchar c8;
 typedef GLenum E;
+typedef GLsizeiptr N;
 
+struct GLDisplay {
+	u32 vao;
+	u32 vbo;
+	u32 ebo;
+
+	void initBuffers(int max_quads) {
+		std::vector<uint16_t> i16(max_quads*6);
+		{
+			for (uint16_t i = 0; i < max_quads; i++) {
+				uint16_t i4 = i * 4;
+				i16[i * 6 + 0] = i4 + 0;
+				i16[i * 6 + 1] = i4 + 1;
+				i16[i * 6 + 2] = i4 + 3;
+				i16[i * 6 + 3] = i4 + 1;
+				i16[i * 6 + 4] = i4 + 2;
+				i16[i * 6 + 5] = i4 + 4;
+			}
+		}
+
+		glGenBuffers(1, &ebo);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+		N size = i16.size() * 2;
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, i16.data(), GL_STATIC_DRAW);
+
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+
+		glGenBuffers(1, &vbo);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+//		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW); //GL_STATIC_DRAW
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+
+//		someOpenGLFunctionThatDrawsOurTriangle();
+	}
+
+	void bufferQuads(float *vertices, int count) {
+		glBufferData(GL_ARRAY_BUFFER, count * 12, vertices, GL_DYNAMIC_DRAW);
+	}
+
+	void draw() {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+//		glUseProgram(shaderProgram);
+		glBindVertexArray(vao);
+//		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+	}
+
+};
 
 
 struct GLProgram {
 	i32 program1 = 0;
-// ifdef macos
+#ifdef WIN32
 	S root = "../";
+#else
+	S root = "../../";
+#endif
 
-	S loadString(S path) {
-		std::ifstream ifs(root+path);
+	S loadString(S filename) {
+		S path = root + filename;
+		std::ifstream ifs( path );
 		if (!ifs.is_open()) {
+			std::cout << "loadString failure for path : " << path << std::endl;
 			return "";
 		}
 		std::stringstream buffer;
@@ -228,17 +283,11 @@ struct GLProgram {
 	}
 
 	i32 loadProgram() {
-<<<<<<< HEAD
-		std::string vertexGles = loadString("shaders/rayVertex.gles");
+		std::string vertexGles = loadString("shaders/rayVertex.glsl");
 		i32 shader1 = loadShader(GL_VERTEX_SHADER, vertexGles.data(), vertexGles.length());
 		check();
-		std::string fragmentGles = loadString("shaders/rayFragment.gles");
-=======
-		std::string vertexGles = loadString("../../shaders/rayVertex.glsl");
-		i32 shader1 = loadShader(GL_VERTEX_SHADER, vertexGles.data(), vertexGles.length());
-		check();
-		std::string fragmentGles = loadString("../../shaders/rayFragment.glsl");
->>>>>>> afe76c6d889acddb25bc1b89751596a248edeb8c
+
+		std::string fragmentGles = loadString("shaders/rayFragment.glsl");
 		i32 shader2 = loadShader(GL_FRAGMENT_SHADER, fragmentGles.data(), fragmentGles.length());
 		check();
 
