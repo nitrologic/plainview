@@ -232,12 +232,56 @@ struct GLDisplay {
 
 
 struct GLProgram {
+
+	GLDisplay display;
+
 	i32 program1 = 0;
+
+	i32 xyzc;
+	i32 view;
+//	i32 handles;
+//	i32 palette;
+
+	void setMatrix(i32 attribute, float* matrix) {
+		glUniformMatrix4fv(attribute, 1, false, matrix);
+		check();
+	}
+
+	void setVertices() {
+
+	}
+
+
 #ifdef WIN32
 	S root = "../";
 #else
 	S root = "../../";
 #endif
+
+	int build() {
+		display.initBuffers(1024);
+		check();
+
+		program1 = loadProgram();
+
+		xyzc = attribute("xyzc");
+		view = uniform("view");
+//		handles = uniform("handles");
+//		palette = uniform("palette");
+
+		glUseProgram(program1);
+		check();
+
+		float identity[] = {1.0,0.0,0.0,0.0, 0.0,1.0,0.0,0.0, 0.0,0.0,1.0,0.0 ,0.0,0.0,0.0,1.0};
+
+		setMatrix(view, identity);
+
+		return 0;
+	}
+
+	void draw() {
+
+	}
 
 	S loadString(S filename) {
 		S path = root + filename;
@@ -251,11 +295,13 @@ struct GLProgram {
 		return buffer.str();
 	}
 
+	// https://stackoverflow.com/questions/6205981/windows-c-stack-trace-from-a-running-app
+
 	int check() {
 		E error = glGetError();
 		if (error) {
 			std::cout << "GL Error " << error << std::endl;
-			abort();
+			exit(1);
 		}
 		return error;
 	}
@@ -263,24 +309,21 @@ struct GLProgram {
 	i32 attribute( const char *name) {
 		i32 a = glGetAttribLocation(program1, name);
 		check();
+		if (a == -1) {
+			std::cout << "GLProgram:attribute " << name << " not found" << std::endl;
+		}
 		return a;
 	}
 
 	i32 uniform(const char* name) {
 		i32 a = glGetUniformLocation(program1, name);
 		check();
+		if (a == -1) {
+			std::cout << "GLProgram:uniform " << name << " not found" << std::endl;
+		}
 		return a;
 	}
 
-
-	int build() {
-		program1 = loadProgram();
-		i32 a0 = attribute("xyzc");
-		i32 u0 = uniform("handles");
-		i32 u1 = uniform("view");
-		i32 u2 = uniform("palette");
-		return 0;
-	}
 
 	i32 loadProgram() {
 		std::string vertexGles = loadString("shaders/rayVertex.glsl");
