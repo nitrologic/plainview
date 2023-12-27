@@ -1,9 +1,8 @@
-<<<<<<< HEAD
+
 //#include <SDL3/SDL_opengl.h>
 
 =======
 https://registry.khronos.org/OpenGL/specs/gl/GLSLangSpec.4.10.pdf
->>>>>>> afe76c6d889acddb25bc1b89751596a248edeb8c
 
 /*
 

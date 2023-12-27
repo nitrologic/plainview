@@ -98,6 +98,7 @@ struct Monitor {
 	R rect;
 	ModeTypes modeTypes;
 	Modes modeList;
+
 	Monitor() {
 		name = "not a display monitor";
 		zoom = 0.0;
@@ -184,23 +185,25 @@ struct GLDisplay {
 	u32 ebo;
 
 	void initBuffers(int max_quads) {
-		std::vector<uint16_t> i16(max_quads*6);
+		std::vector<uint16_t> indices(max_quads*6);
 		{
 			for (uint16_t i = 0; i < max_quads; i++) {
+				uint16_t *i16 = &indices[i * 6];
 				uint16_t i4 = i * 4;
-				i16[i * 6 + 0] = i4 + 0;
-				i16[i * 6 + 1] = i4 + 1;
-				i16[i * 6 + 2] = i4 + 3;
-				i16[i * 6 + 3] = i4 + 1;
-				i16[i * 6 + 4] = i4 + 2;
-				i16[i * 6 + 5] = i4 + 4;
+				i16[0] = i4 + 0;
+				i16[1] = i4 + 1;
+				i16[2] = i4 + 3;
+				i16[3] = i4 + 1;
+				i16[4] = i4 + 2;
+				i16[5] = i4 + 4;
 			}
 		}
 
+		N size = indices.size() * 2;
+
 		glGenBuffers(1, &ebo);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-		N size = i16.size() * 2;
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, i16.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, indices.data(), GL_STATIC_DRAW);
 
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
@@ -210,17 +213,18 @@ struct GLDisplay {
 
 //		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW); //GL_STATIC_DRAW
 
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
 
 //		someOpenGLFunctionThatDrawsOurTriangle();
 	}
 
 	void bufferQuads(float *vertices, int count) {
-		glBufferData(GL_ARRAY_BUFFER, count * 12, vertices, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, count * 16, vertices, GL_DYNAMIC_DRAW);
 	}
 
 	void draw() {
+		glBindVertexArray(vao);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 //		glUseProgram(shaderProgram);
 		glBindVertexArray(vao);
@@ -229,7 +233,6 @@ struct GLDisplay {
 	}
 
 };
-
 
 struct GLProgram {
 
@@ -248,6 +251,14 @@ struct GLProgram {
 	}
 
 	void setVertices() {
+		float verts[] = {
+			0.0 , 0.0, 0.0, 0.0,
+			20.0 , 0.0, 0.0, 0.0,
+			20.0 , 20.0, 0.0, 0.0,
+			0.0 , 20.0, 0.0, 0.0
+		};
+
+		display.bufferQuads(verts, 4);
 
 	}
 
@@ -264,23 +275,29 @@ struct GLProgram {
 
 		program1 = loadProgram();
 
+		if (program1 == -1) 
+			return 1;
+
+		glUseProgram(program1);
+		check();
+
 		xyzc = attribute("xyzc");
 		view = uniform("view");
 //		handles = uniform("handles");
 //		palette = uniform("palette");
 
-		glUseProgram(program1);
+		float identity[] = {1.0,0.0,0.0,0.0, 0.0,1.0,0.0,0.0, 0.0,0.0,1.0,0.0 ,0.0,0.0,0.0,1.0};
+		setMatrix(view, identity);
 		check();
 
-		float identity[] = {1.0,0.0,0.0,0.0, 0.0,1.0,0.0,0.0, 0.0,0.0,1.0,0.0 ,0.0,0.0,0.0,1.0};
-
-		setMatrix(view, identity);
+		setVertices();
+		check();
 
 		return 0;
 	}
 
 	void draw() {
-
+		display.draw();
 	}
 
 	S loadString(S filename) {
@@ -344,7 +361,6 @@ struct GLProgram {
 
 		int status[4];
 		glGetProgramiv(program1, GL_LINK_STATUS, status);
-
 		if (status[0] == 0) {
 			int status2[4];
 			glGetProgramiv(program1, GL_INFO_LOG_LENGTH, status2);
@@ -357,7 +373,7 @@ struct GLProgram {
 				}
 			}
 			glDeleteProgram(program1);
-			return 0;
+			return -1;
 		}
 
 		return program1;
@@ -393,14 +409,22 @@ struct GLProgram {
 };
 
 struct GLEngine {
+	GLProgram program;
 
 	int test() {
 
         const char* version = (const char *)glGetString(GL_SHADING_LANGUAGE_VERSION);
         std::cout << "GL_SHADING_LANGUAGE_VERSION : " << version << std::endl;
 
-		GLProgram p;
-		p.build();
+		program.build();
+
+		return 0;
+	}
+
+	int draw() {
+
+		program.draw();
+
 		return 0;
 	}
 };
@@ -428,6 +452,8 @@ constructor(gl, source, shaderType, uri) {
 */
 
 struct SDLDriver : Driver {
+
+	GLEngine engine;
 
 	Uint32 sdlFlags;
 
@@ -531,6 +557,9 @@ struct SDLDriver : Driver {
 			x += period;
 		}
 		glDisable(GL_SCISSOR_TEST);
+
+		engine.draw();
+
 		SDL_GL_SwapWindow(window);
 	}
 
@@ -585,8 +614,8 @@ struct SDLDriver : Driver {
 			std::cout << "addWindow failure" << std::endl;
 			return -1;
 		}
-		GLEngine e;
-		e.test();
+
+		engine.test();
 		bool running = true;
 		int surface = frame;
 		while (running) {

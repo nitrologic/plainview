@@ -29,6 +29,12 @@ include_directories(
 ADD_EXECUTABLE(plainview
     glad/gl.h
     plainview.cpp 
+# shaders
+    shaders/rayFragment.glsl
+    shaders/rayVertex.glsl
+# documentation
+    notes.txt
+    README.md
 )
 
 if(WIN32)
