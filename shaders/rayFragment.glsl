@@ -1,8 +1,8 @@
 #version 410
 
-vec4 color;
-vec4 rgba;
+in vec4 color;
+out vec4 rgba;
 
 void main(){
-	rgba=color;
+	rgba = color;
 }

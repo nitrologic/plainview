@@ -219,27 +219,42 @@ struct GLDisplay {
 //		someOpenGLFunctionThatDrawsOurTriangle();
 	}
 
-	void bufferQuads(float *vertices, int count) {
+	void bufferQuads(i32 attribute, float *vertices, int count) {
+
+		glBindVertexArray(vao);
+
+		int index = attribute;
+		int dim = 4; // size in components, 1,2,3 or 4
+		int offset = 0;
+		int stride = 0; // tightly packed
+
+		void* pointer = 0;
+
+//		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+//		glEnableVertexAttribArray(0);
+
+		glVertexAttribPointer(index, dim, GL_FLOAT, GL_FALSE, stride, pointer);
+
 		glBufferData(GL_ARRAY_BUFFER, count * 16, vertices, GL_DYNAMIC_DRAW);
 	}
 
 	void draw() {
+
 		glBindVertexArray(vao);
+
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 //		glUseProgram(shaderProgram);
 		glBindVertexArray(vao);
-//		glDrawArrays(GL_TRIANGLES, 0, 3);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+
+		glDrawArrays(GL_TRIANGLES, 0, 4);
+//		glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, 0);
 	}
 
 };
 
 struct GLProgram {
-
 	GLDisplay display;
-
 	i32 program1 = 0;
-
 	i32 xyzc;
 	i32 view;
 //	i32 handles;
@@ -249,19 +264,6 @@ struct GLProgram {
 		glUniformMatrix4fv(attribute, 1, false, matrix);
 		check();
 	}
-
-	void setVertices() {
-		float verts[] = {
-			0.0 , 0.0, 0.0, 0.0,
-			20.0 , 0.0, 0.0, 0.0,
-			20.0 , 20.0, 0.0, 0.0,
-			0.0 , 20.0, 0.0, 0.0
-		};
-
-		display.bufferQuads(verts, 4);
-
-	}
-
 
 #ifdef WIN32
 	S root = "../";
@@ -273,27 +275,41 @@ struct GLProgram {
 		display.initBuffers(1024);
 		check();
 
+// load program
 		program1 = loadProgram();
-
 		if (program1 == -1) 
 			return 1;
-
 		glUseProgram(program1);
 		check();
-
+// fetch attributes
 		xyzc = attribute("xyzc");
 		view = uniform("view");
-//		handles = uniform("handles");
-//		palette = uniform("palette");
-
+// set view
 		float identity[] = {1.0,0.0,0.0,0.0, 0.0,1.0,0.0,0.0, 0.0,0.0,1.0,0.0 ,0.0,0.0,0.0,1.0};
 		setMatrix(view, identity);
 		check();
-
+// set verts
 		setVertices();
 		check();
 
+
+		//		handles = uniform("handles");
+		//		palette = uniform("palette");
+
+
+
 		return 0;
+	}
+
+	void setVertices() {
+		float verts[] = {
+			0.0 , 0.0, 0.0, 0.0,
+			20.0 , 0.0, 0.0, 0.0,
+			20.0 , 20.0, 0.0, 0.0,
+			0.0 , 20.0, 0.0, 0.0
+		};
+
+		display.bufferQuads(xyzc, verts, 4);
 	}
 
 	void draw() {
@@ -340,7 +356,6 @@ struct GLProgram {
 		}
 		return a;
 	}
-
 
 	i32 loadProgram() {
 		std::string vertexGles = loadString("shaders/rayVertex.glsl");
@@ -408,52 +423,25 @@ struct GLProgram {
 
 };
 
-struct GLEngine {
+struct GL4Engine {
 	GLProgram program;
 
 	int test() {
-
         const char* version = (const char *)glGetString(GL_SHADING_LANGUAGE_VERSION);
         std::cout << "GL_SHADING_LANGUAGE_VERSION : " << version << std::endl;
-
 		program.build();
-
 		return 0;
 	}
 
 	int draw() {
-
 		program.draw();
-
 		return 0;
 	}
 };
 
-/*
-constructor(gl, source, shaderType, uri) {
-			const shader = gl.createShader(shaderType);
-			gl.shaderSource(shader, source);
-			gl.compileShader(shader);
-			const success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-			if (success) {
-				this.shader = shader;
-			}
-			else {
-				const info = gl.getShaderInfoLog(shader);
-				console.error("Could not compile WebGL shader", uri);
-				console.error(info);
-				const split = info.split(":");
-				if (split[0] == "ERROR") {
-					this.error = split;
-				}
-				gl.deleteShader(shader);
-			}
-		}
-*/
-
 struct SDLDriver : Driver {
 
-	GLEngine engine;
+	GL4Engine engine;
 
 	Uint32 sdlFlags;
 
@@ -466,7 +454,6 @@ struct SDLDriver : Driver {
         SDL_version version;
         SDL_GetVersion(&version);
         std::cout << "SDL " << (int)version.major << "." << (int)version.minor << "." << (int)version.patch << std::endl;
-        
         
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
@@ -544,14 +531,16 @@ struct SDLDriver : Driver {
 		SDL_Window* window = sdlFrame.window;
 		int w, h;
 		SDL_GetWindowSizeInPixels(window, &w, &h);
+
 		int period = 48;
 		int wide = 7;
+		int high = 24;
 		int x = 10 + frameCount % period;
 		glClearColor(0.1f, 0.f, 0.4f, 1.f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glEnable(GL_SCISSOR_TEST);
 		while (x < w) {
-			glScissor(x, 0, wide, h);
+			glScissor(x, 0, wide, high);
 			glClearColor(0.8f, 0.8f, 1.f, 1.f);
 			glClear(GL_COLOR_BUFFER_BIT);
 			x += period;
