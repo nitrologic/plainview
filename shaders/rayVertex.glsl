@@ -2,12 +2,12 @@
 
 uniform mat4 view;
 
-in vec4 xyzc;
+in vec3 xyz;
 
 out vec4 color;
 
 void main(){
-	vec4 v = vec4( xyzc.x, xyzc.y, xyzc.z, 1.0 );
+	vec4 v = vec4( xyz.x, xyz.y, xyz.z, 1.0 );
 
 	vec4 vv = v * view;
 
