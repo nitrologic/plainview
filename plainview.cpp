@@ -186,7 +186,7 @@ struct GLDisplay {
 	u32 vbo;
 	u32 ebo;
 
-	void initIndices(int max_quads) {
+	void initWinding(int max_quads) {
 		std::vector<uint16_t> indices(max_quads * 6);
 		{
 			for (uint16_t i = 0; i < max_quads; i++) {
@@ -204,26 +204,30 @@ struct GLDisplay {
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, indices.data(), GL_STATIC_DRAW);
 	}
 
-	void initBuffers(i32 attribute, int max_quads) {
-		int index = attribute;
+	void initDisplay(i32 attribute, int max_quads) {
 
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
 
 		glGenBuffers(1, &ebo);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-		initIndices(max_quads);
+
+		// ebo setup winding indices as a string of quads 
+
+		initWinding(max_quads);
 
 		glGenBuffers(1, &vbo);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-		glVertexAttribPointer(index, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+//		glVertexAttribPointer(index, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+//		glVertexAttribPointer(index, 4, GL_INT, GL_FALSE, 4 * sizeof(int), (void*)0);
+		int index = attribute;
 		glEnableVertexAttribArray(index);
+		glVertexAttribPointer(index, 4, GL_FLOAT, GL_FALSE, 0, 0);
 	}
 
 	void bufferQuads(i32 attribute, float *vertices, int count) {
 //		glBindVertexArray(vao);
-//		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 
 		int index = attribute;
 		int dim = 4; // size in components, 1,2,3 or 4
@@ -235,13 +239,13 @@ struct GLDisplay {
 //		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 //		glEnableVertexAttribArray(0);
 
-		glVertexAttribPointer(index, dim, GL_FLOAT, GL_FALSE, stride, pointer);
+//		glVertexAttribPointer(index, dim, GL_FLOAT, GL_FALSE, stride, pointer);
 
 		glBufferData(GL_ARRAY_BUFFER, count * 16, vertices, GL_DYNAMIC_DRAW);
 	}
 
 	void draw() {
-		glBindVertexArray(vao);
+//		glBindVertexArray(vao);
 //		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
 	}
@@ -262,19 +266,22 @@ struct GLProgram {
 	}
 
 	void setView() {
-		float mx = 0.010;// 2.0 / 3200;
-		float my = -0.1;// / 2000;
-		float dx = -0.5;
+		float mx = 0.01;
+		float my = -0.01;
+
+		float dx = -0.8;
 		float dy = 0.8;
 
 		float identity[] = 
 		{ 
 			mx, 0.0, 0.0, dx,
+
 			0.0, my, 0.0, dy,
 
-			0.0,0.0,1.0,0.0,
-			0.0,0.0,0.0,1.0 
+			0.0, 0.0, 1.0, 0.0,
+			0.0, 0.0, 0.0, 1.0 
 		};
+
 		setMatrix(view, identity);
 		check();
 	}
@@ -298,7 +305,7 @@ struct GLProgram {
 		xyzc = attribute("xyzc");
 		view = uniform("view");
 // setup display
-		display.initBuffers(xyzc, 1024);
+		display.initDisplay(xyzc, 1024);
 		check();
 // set view
 //		float identity[] = {1.0,0.0,0.0,0.0, 0.0,1.0,0.0,0.0, 0.0,0.0,1.0,0.0 ,0.0,0.0,0.0,1.0};
@@ -320,11 +327,18 @@ struct GLProgram {
 			20.0 , 20.0, 0.0, 0.0,
 			0.0 , 20.0, 0.0, 0.0
 		};
+		int iverts[] = {
+			0 , 0, 0, 0,
+			1 , 0, 0, 0,
+			1 , 20, 0, 0,
+			0 , 20, 0, 0
+		};
 
 		display.bufferQuads(xyzc, verts, 4);
 	}
 
 	void draw() {
+		setView();
 		display.draw();
 	}
 
