@@ -1,3 +1,8 @@
+//		glUseProgram(shaderProgram);
+//		glBindVertexArray(vao);
+//		glDrawArrays(GL_TRIANGLES, 0, 4);
+
+
 
 #version 410
 

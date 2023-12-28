@@ -179,49 +179,51 @@ typedef GLchar c8;
 typedef GLenum E;
 typedef GLsizeiptr N;
 
+// quad order is clockwise
+
 struct GLDisplay {
 	u32 vao;
 	u32 vbo;
 	u32 ebo;
 
-	void initBuffers(int max_quads) {
-		std::vector<uint16_t> indices(max_quads*6);
+	void initIndices(int max_quads) {
+		std::vector<uint16_t> indices(max_quads * 6);
 		{
 			for (uint16_t i = 0; i < max_quads; i++) {
-				uint16_t *i16 = &indices[i * 6];
+				uint16_t* i16 = &indices[i * 6];
 				uint16_t i4 = i * 4;
 				i16[0] = i4 + 0;
 				i16[1] = i4 + 1;
-				i16[2] = i4 + 3;
-				i16[3] = i4 + 1;
-				i16[4] = i4 + 2;
-				i16[5] = i4 + 4;
+				i16[2] = i4 + 2;
+				i16[3] = i4 + 2;
+				i16[4] = i4 + 3;
+				i16[5] = i4 + 0;
 			}
 		}
-
 		N size = indices.size() * 2;
-
-		glGenBuffers(1, &ebo);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, indices.data(), GL_STATIC_DRAW);
+	}
+
+	void initBuffers(i32 attribute, int max_quads) {
+		int index = attribute;
 
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
 
+		glGenBuffers(1, &ebo);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+		initIndices(max_quads);
+
 		glGenBuffers(1, &vbo);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-//		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW); //GL_STATIC_DRAW
-
-		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-		glEnableVertexAttribArray(0);
-
-//		someOpenGLFunctionThatDrawsOurTriangle();
+		glVertexAttribPointer(index, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(index);
 	}
 
 	void bufferQuads(i32 attribute, float *vertices, int count) {
-
-		glBindVertexArray(vao);
+//		glBindVertexArray(vao);
+//		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 
 		int index = attribute;
 		int dim = 4; // size in components, 1,2,3 or 4
@@ -239,15 +241,9 @@ struct GLDisplay {
 	}
 
 	void draw() {
-
 		glBindVertexArray(vao);
-
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-//		glUseProgram(shaderProgram);
-		glBindVertexArray(vao);
-
-		glDrawArrays(GL_TRIANGLES, 0, 4);
-//		glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, 0);
+//		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
 	}
 
 };
@@ -260,10 +256,29 @@ struct GLProgram {
 //	i32 handles;
 //	i32 palette;
 
-	void setMatrix(i32 attribute, float* matrix) {
-		glUniformMatrix4fv(attribute, 1, false, matrix);
+	void setMatrix(i32 uniform, float* matrix) {
+		glUniformMatrix4fv(uniform, 1, false, matrix);
 		check();
 	}
+
+	void setView() {
+		float mx = 0.010;// 2.0 / 3200;
+		float my = -0.1;// / 2000;
+		float dx = -0.5;
+		float dy = 0.8;
+
+		float identity[] = 
+		{ 
+			mx, 0.0, 0.0, dx,
+			0.0, my, 0.0, dy,
+
+			0.0,0.0,1.0,0.0,
+			0.0,0.0,0.0,1.0 
+		};
+		setMatrix(view, identity);
+		check();
+	}
+
 
 #ifdef WIN32
 	S root = "../";
@@ -272,8 +287,6 @@ struct GLProgram {
 #endif
 
 	int build() {
-		display.initBuffers(1024);
-		check();
 
 // load program
 		program1 = loadProgram();
@@ -284,20 +297,19 @@ struct GLProgram {
 // fetch attributes
 		xyzc = attribute("xyzc");
 		view = uniform("view");
-// set view
-		float identity[] = {1.0,0.0,0.0,0.0, 0.0,1.0,0.0,0.0, 0.0,0.0,1.0,0.0 ,0.0,0.0,0.0,1.0};
-		setMatrix(view, identity);
+// setup display
+		display.initBuffers(xyzc, 1024);
 		check();
+// set view
+//		float identity[] = {1.0,0.0,0.0,0.0, 0.0,1.0,0.0,0.0, 0.0,0.0,1.0,0.0 ,0.0,0.0,0.0,1.0};
+//		setMatrix(view, identity);
+//		check();
+ 		setView();
 // set verts
 		setVertices();
 		check();
-
-
-		//		handles = uniform("handles");
-		//		palette = uniform("palette");
-
-
-
+//		handles = uniform("handles");
+//		palette = uniform("palette");
 		return 0;
 	}
 
