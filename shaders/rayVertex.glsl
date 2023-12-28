@@ -3,6 +3,7 @@
 uniform mat4 view;
 
 in vec4 xyzc;
+
 out vec4 color;
 
 void main(){

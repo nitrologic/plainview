@@ -184,7 +184,7 @@ typedef GLsizeiptr N;
 struct GLDisplay {
 	u32 vao;
 	u32 vbo;
-	u32 ebo;
+	u32 wbo;
 
 	void initWinding(int max_quads) {
 		std::vector<uint16_t> indices(max_quads * 6);
@@ -209,38 +209,51 @@ struct GLDisplay {
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
 
-		glGenBuffers(1, &ebo);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+		// wbo - winding buffer - winding indices as a string of quads 
 
-		// ebo setup winding indices as a string of quads 
-
+		glGenBuffers(1, &wbo);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, wbo);
 		initWinding(max_quads);
+
+
+		// vbo - vertex buffer - 
+
+		// The attribute qualifier can be used only with the data types float, vec2, vec3, vec4, mat2, mat3, and mat4.
+
+		// glEnableVertexAttribArray uses currently bound vertex array object for the operation, 
+		// whereas glEnableVertexArrayAttrib updates state of the vertex array object with ID vaobj.
 
 		glGenBuffers(1, &vbo);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
+		glEnableVertexAttribArray(attribute);
+
+//		glEnableVertexArrayAttrib(vao, attribute);
+
 //		glVertexAttribPointer(index, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 //		glVertexAttribPointer(index, 4, GL_INT, GL_FALSE, 4 * sizeof(int), (void*)0);
-		int index = attribute;
-		glEnableVertexAttribArray(index);
-		glVertexAttribPointer(index, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+//		glVertexAttribPointer(attribute, 4, GL_FLOAT, GL_FALSE, 0, 0);
+		glVertexAttribPointer(attribute, 4, GL_INT, GL_FALSE, 0, 0);
 	}
 
-	void bufferQuads(i32 attribute, float *vertices, int count) {
-//		glBindVertexArray(vao);
+	// The attribute qualifier can be used only with the data types float, vec2, vec3, vec4, mat2, mat3, and mat4.
 
+	void bufferQuads(i32 attribute, int* vertices, int count) {
+
+		glBufferData(GL_ARRAY_BUFFER, count * 16, vertices, GL_DYNAMIC_DRAW);
+	}
+
+	void bufferFloatQuads(i32 attribute, float *vertices, int count) {
+//		glBindVertexArray(vao);
 		int index = attribute;
 		int dim = 4; // size in components, 1,2,3 or 4
 		int offset = 0;
 		int stride = 0; // tightly packed
-
 		void* pointer = 0;
-
 //		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 //		glEnableVertexAttribArray(0);
-
 //		glVertexAttribPointer(index, dim, GL_FLOAT, GL_FALSE, stride, pointer);
-
 		glBufferData(GL_ARRAY_BUFFER, count * 16, vertices, GL_DYNAMIC_DRAW);
 	}
 
@@ -329,12 +342,13 @@ struct GLProgram {
 		};
 		int iverts[] = {
 			0 , 0, 0, 0,
-			1 , 0, 0, 0,
-			1 , 20, 0, 0,
+			20 , 0, 0, 0,
+			20 , 20, 0, 0,
 			0 , 20, 0, 0
 		};
 
-		display.bufferQuads(xyzc, verts, 4);
+//		display.bufferQuads(xyzc, verts, 4);
+		display.bufferQuads(xyzc, iverts, 4);
 	}
 
 	void draw() {
@@ -481,9 +495,14 @@ struct SDLDriver : Driver {
         SDL_GetVersion(&version);
         std::cout << "SDL " << (int)version.major << "." << (int)version.minor << "." << (int)version.patch << std::endl;
         
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+		// 3.2 or 4.0
+
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+
+
+//		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES );
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     }
 
 	void quit() {
