@@ -303,7 +303,7 @@ struct GLProgram {
 #ifdef WIN32
 	S root = "../";
 #else
-	S root = "../../";
+	S root = "../";
 #endif
 
 	int build() {
@@ -497,8 +497,8 @@ struct SDLDriver : Driver {
         
 		// 3.2 or 4.0
 
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 
 
 //		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES );
