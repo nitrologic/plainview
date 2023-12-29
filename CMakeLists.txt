@@ -28,7 +28,11 @@ include_directories(
 
 ADD_EXECUTABLE(plainview
     glad/gl.h
-    plainview.cpp 
+    platform.h
+    sdl3driver.h
+    gl3engine.h
+    plainview.h
+    plainview.cpp
 # shaders
     shaders/rayFragment.glsl
     shaders/rayVertex.glsl

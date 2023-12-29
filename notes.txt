@@ -1,3 +1,13 @@
+
+
+
+if(MSVC)
+  target_compile_options(<target> PUBLIC "/ZI")
+  target_link_options(<target> PUBLIC "/INCREMENTAL")
+endif()
+
+
+
 		// vbo - vertex buffer - 
 
 		// The attribute qualifier can be used only with the data types float, vec2, vec3, vec4, mat2, mat3, and mat4.
