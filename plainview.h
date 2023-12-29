@@ -63,7 +63,7 @@ typedef Rect32 R;
 
 
 struct Engine {
-	virtual void draw() = 0;
+	virtual void draw(int w, int h) = 0;
 	virtual int test() = 0;
 };
 

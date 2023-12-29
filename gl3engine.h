@@ -71,6 +71,10 @@ struct GLDisplay {
 
 // 20.12 integer fixed point pixel positions
 
+using SubPixel = int;
+
+const SubPixel PXL = 1 << 12;
+
 struct GLProgram {
 	GLDisplay display;
 	i32 program1 = 0;
@@ -79,32 +83,40 @@ struct GLProgram {
 //	i32 handles;
 //	i32 palette;
 
+	void draw(int w, int h) {
+		setView(w,h);
+		display.draw();
+	}
+
+	void setVertices() {
+		int iverts[] = {
+			0 , 0, 0,
+			PXL * 20 , 0, 0,
+			PXL * 20 , PXL * 20, 0,
+			0 , PXL * 20, 0
+		};
+		display.bufferQuads(xyz, iverts, 4);
+	}
+
 	void setMatrix(i32 uniform, float* matrix) {
 		glUniformMatrix4fv(uniform, 1, false, matrix);
 		check();
 	}
 
-	void setView() {
-		float mx = 0.01;
-		float my = -0.01;
-
-		float dx = -0.8;
-		float dy = 0.8;
-
-		float identity[] = 
-		{ 
+	void setView(int w,int h) {
+		float mx = 2.0 / ( w * PXL);
+		float my = -2.0 / ( h * PXL);
+		float dx = -1.0;
+		float dy = 1.0;
+		float identity[] =  { 
 			mx, 0.0, 0.0, dx,
-
 			0.0, my, 0.0, dy,
-
 			0.0, 0.0, 1.0, 0.0,
 			0.0, 0.0, 0.0, 1.0 
 		};
-
 		setMatrix(view, identity);
 		check();
 	}
-
 
 #ifdef WIN32
 	S root = "../";
@@ -127,41 +139,14 @@ struct GLProgram {
 		display.initDisplay(xyz, 1024);
 		check();
 // set view
-//		float identity[] = {1.0,0.0,0.0,0.0, 0.0,1.0,0.0,0.0, 0.0,0.0,1.0,0.0 ,0.0,0.0,0.0,1.0};
-//		setMatrix(view, identity);
+// 		setView();
 //		check();
- 		setView();
 // set verts
 		setVertices();
 		check();
 //		handles = uniform("handles");
 //		palette = uniform("palette");
 		return 0;
-	}
-
-	void setVertices() {
-		int iverts[] = {
-			0 , 0, 0,
-			20 , 0, 0,
-			20 , 20, 0,
-			0 , 20, 0
-		};
-		display.bufferQuads(xyz, iverts, 4);
-	}
-
-	void setfVertices() {
-		float verts[] = {
-			0.0 , 0.0, 0.0, 0.0,
-			20.0 , 0.0, 0.0, 0.0,
-			20.0 , 20.0, 0.0, 0.0,
-			0.0 , 20.0, 0.0, 0.0
-		};
-//		display.bufferQuads(xyzc, verts, 4);
-	}
-
-	void draw() {
-		setView();
-		display.draw();
 	}
 
 	S loadString(S filename) {
@@ -281,9 +266,7 @@ struct GL3Engine : Engine {
 		return 0;
 	}
 
-	void draw() {
-		program.draw();
+	void draw(int w, int h) {
+		program.draw(w,h);
 	}
 };
-
-

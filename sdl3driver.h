@@ -119,7 +119,7 @@ struct SDLDriver : Driver {
 		}
 		glDisable(GL_SCISSOR_TEST);
 
-		_engine->draw();
+		_engine->draw(w,h);
 
 		SDL_GL_SwapWindow(window);
 	}
