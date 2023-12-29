@@ -16,22 +16,27 @@ typedef GLchar c8;
 typedef GLenum E;
 typedef GLsizeiptr N;
 
-// quad order is clockwise
 
 struct GLDisplay {
 	u32 vao;
 	u32 wbo;
 	u32 vbo;
 
+	int maxQuads;
+
+	// last vert in tri is provoking vertex for flat attributes such as bits
+	// quad order is clockwise - topleft, topright, bottomright, bottomleft
+
 	void initWinding(int max_quads) {
+		maxQuads = max_quads;
 		std::vector<uint16_t> indices(max_quads * 6);
 		{
 			for (uint16_t i = 0; i < max_quads; i++) {
 				uint16_t* i16 = &indices[i * 6];
 				uint16_t i4 = i * 4;
-				i16[0] = i4 + 0;
-				i16[1] = i4 + 1;
-				i16[2] = i4 + 2;
+				i16[0] = i4 + 1;
+				i16[1] = i4 + 2;
+				i16[2] = i4 + 0;
 				i16[3] = i4 + 2;
 				i16[4] = i4 + 3;
 				i16[5] = i4 + 0;
@@ -41,7 +46,7 @@ struct GLDisplay {
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, indices.data(), GL_STATIC_DRAW);
 	}
 
-	void initDisplay(i32 attribute, int max_quads) {
+	void initDisplay(i32 xyz, i32 bits, int max_quads) {
 		// vao - attributes
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
@@ -54,20 +59,89 @@ struct GLDisplay {
 		// vbo - array buffer
 		glGenBuffers(1, &vbo);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glEnableVertexAttribArray(attribute);
-		glVertexAttribPointer(attribute, 3, GL_INT, GL_FALSE, 0, 0);
+
+		int bufferSize = maxQuads * (12 + 4);
+		glBufferData(GL_ARRAY_BUFFER, bufferSize, 0, GL_DYNAMIC_DRAW);
+
+		glEnableVertexAttribArray(xyz);
+		glVertexAttribPointer(xyz, 3, GL_INT, GL_FALSE, 0, 0);
+
+		glEnableVertexAttribArray(bits);
+		glVertexAttribPointer(bits, 1, GL_INT, GL_FALSE, 0, (void *)(maxQuads * 3 * 4) );
 	}
 
-	void bufferQuads(i32 attribute, int* vertices, int count) {
-		glBufferData(GL_ARRAY_BUFFER, count * 12, vertices, GL_DYNAMIC_DRAW);
+
+	int totalTris = 0;
+
+	void bufferQuads(int* vertices, int *bits, int quadcount) {
+		totalTris += quadcount * 2;
+		int vertcount = quadcount * 4;
+		glBufferSubData(GL_ARRAY_BUFFER, 0, vertcount * 12, vertices);
+		int offset = maxQuads * 12;
+		glBufferSubData(GL_ARRAY_BUFFER, offset, vertcount * 4, bits);
 	}
 
 	void draw() {
 //		glBindVertexArray(vao);
 //		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+		glDrawElements(GL_TRIANGLES, totalTris * 3, GL_UNSIGNED_SHORT, 0);
 	}
 };
+
+const float palette32[] = {
+	1,0,1,1,
+	1,1,0,1,
+	0,1,1,1,
+	1,0,0,1,
+	1,0,0,1,
+	1,0,0,1,
+	1,0,0,1,
+	1,0,0,1,
+	1,0,0,1,
+	1,0,0,1,
+	1,0,0,1,
+	1,0,0,1,
+	1,0,0,1,
+	1,0,0,1,
+	1,0,0,1,
+	1,0,0,1,
+	1,0,0,1,
+	1,0,0,1,
+	1,0,0,1,
+	1,0,0,1,
+	1,0,0,1,
+	1,0,0,1,
+	1,0,0,1,
+	1,0,0,1,
+	1,0,0,1,
+	1,0,0,1,
+	1,0,0,1,
+	1,0,0,1,
+	1,0,0,1,
+	1,0,0,1,
+	1,0,0,1,
+	1,1,1,1,
+	1,1,1,1,
+	1,1,1,1,
+	1,1,1,1,
+	1,1,1,1,
+	1,1,1,1,
+	1,1,1,1,
+	1,1,1,1,
+	1,1,1,1,
+	1,1,1,1,
+	1,1,1,1,
+	1,1,1,1,
+	1,1,1,1,
+	1,1,1,1,
+	1,1,1,1,
+	1,1,1,1,
+	1,1,1,1,
+	1,1,1,1,
+	1,1,1,1,
+	1,1,1,1
+};
+
 
 // 20.12 integer fixed point pixel positions
 
@@ -79,23 +153,57 @@ struct GLProgram {
 	GLDisplay display;
 	i32 program1 = 0;
 	i32 xyz;
+	i32 bits;
 	i32 view;
-//	i32 handles;
-//	i32 palette;
+	i32 palette;
+
+	int build() {
+
+		// load program
+		program1 = loadProgram();
+		if (program1 == -1)
+			return 1;
+		glUseProgram(program1);
+		check();
+		// fetch attributes
+		xyz = attribute("xyz");
+		bits = attribute("bits");
+		view = uniform("view");
+		palette = uniform("palette");
+		// setup display
+		display.initDisplay(xyz, bits, 1024);
+		check();
+		// set verts
+		setVertices();
+		check();
+		return 0;
+	}
 
 	void draw(int w, int h) {
+
+		setPalette(palette32);
 		setView(w,h);
 		display.draw();
 	}
 
 	void setVertices() {
 		int iverts[] = {
-			0 , 0, 0,
-			PXL * 20 , 0, 0,
-			PXL * 20 , PXL * 20, 0,
-			0 , PXL * 20, 0
+			PXL * 10 , PXL * 10, 0,
+			PXL * 200 , PXL * 10, 0,
+			PXL * 200 , PXL * 500, 0,
+			PXL * 10 , PXL * 500, 0,
+			PXL * 410 , PXL * 10, 0,
+			PXL * 500 , PXL * 10, 0,
+			PXL * 500 , PXL * 500, 0,
+			PXL * 410 , PXL * 500, 0
 		};
-		display.bufferQuads(xyz, iverts, 4);
+
+		int ibits[] = { 
+			2,0,0,0,
+			1,0,0,0
+		};
+
+		display.bufferQuads(iverts, ibits, 2);
 	}
 
 	void setMatrix(i32 uniform, float* matrix) {
@@ -118,36 +226,16 @@ struct GLProgram {
 		check();
 	}
 
+	void setPalette(const float *colortable32){
+		i32 uniform = palette;
+		glUniform4fv(uniform, 32, colortable32);
+	}
+
 #ifdef WIN32
 	S root = "../";
 #else
 	S root = "../";
 #endif
-
-	int build() {
-
-// load program
-		program1 = loadProgram();
-		if (program1 == -1) 
-			return 1;
-		glUseProgram(program1);
-		check();
-// fetch attributes
-		xyz = attribute("xyz");
-		view = uniform("view");
-// setup display
-		display.initDisplay(xyz, 1024);
-		check();
-// set view
-// 		setView();
-//		check();
-// set verts
-		setVertices();
-		check();
-//		handles = uniform("handles");
-//		palette = uniform("palette");
-		return 0;
-	}
 
 	S loadString(S filename) {
 		S path = root + filename;

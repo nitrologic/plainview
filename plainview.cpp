@@ -10,7 +10,7 @@ All Rights Reserved
 
 */
 
-const char *plainviewVersion = "0.3";
+const char *plainviewVersion = "0.4";
 
 static bool terminateApp = false;
 

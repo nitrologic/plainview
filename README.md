@@ -8,21 +8,10 @@ A plain view of the modern monitor video display landscape
 
 ## Latest
 
-![plainview version 0.3](plainview3.png)
+![plainview version 0.4](plainview3.png)
 
-## Window manager evaluation
-
-### SDL 3
-
-* no display names
-* patchable CVDisplayLink support for MacOS
-* reports 1x and 2x pixel densities per video mode
-
-### GLFW 3
-
-* correct monitor names
-* no CVDisplayLink support
-* no pixel density encoded in video mode
+	* support for GLFW 3 removed
+	* big ups to SDL3 for managing OpenGL 3.2 GLSL 3.30 so well
 
 ## Credits
 

@@ -1,8 +1,11 @@
 #version 330
 
-in vec4 color;
+uniform vec4 palette[32];
+
+flat in int frag_bits;
+
 out vec4 rgba;
 
 void main(){
-	rgba = color;
+	rgba = palette[frag_bits & 31];
 }
