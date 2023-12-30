@@ -171,7 +171,7 @@ struct GLProgram {
 		view = uniform("view");
 		palette = uniform("palette");
 		// setup display
-		display.initDisplay(xyz, bits, 1024);
+		display.initDisplay(xyz, bits, 16000);
 		check();
 		// set verts
 		setVertices();
