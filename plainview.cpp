@@ -71,8 +71,29 @@ void dumpModes() {
 	std::cout << std::endl;
 }
 
+Socket l(0);
+
+int testListen() {
+	l.listen(8080, 0, nullptr);
+	return 0;
+}
+
+int testLoopback() {
+	Socket* c = Socket::connect("localhost", 8080);
+	if (c == nullptr) return 1;
+	c->write("hell", 4);
+	c->close();
+	return 0;
+}
+
 int main() {
 	std::cout << "plainview " << plainviewVersion << std::endl;
+
+//	int oscin = Socket::testOSCIn();
+	testListen();
+
+//	testLoopback();
+
 	Driver *sdlDriver = sdlOpen();
 //	dumpModes();
 	Engine* engine = new GL3Engine();

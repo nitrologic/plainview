@@ -27,8 +27,9 @@ include_directories(
 )
 
 ADD_EXECUTABLE(plainview
-    glad/gl.h
     platform.h
+    platform.cpp
+    glad/gl.h
     sdl3driver.h
     gl3engine.h
     plainview.h
@@ -42,7 +43,7 @@ ADD_EXECUTABLE(plainview
 )
 
 if(WIN32)
-target_link_libraries(plainview SDL3-static)
+target_link_libraries(plainview SDL3-static Ws2_32 Mswsock Advapi32)
 endif(WIN32)
 
 if(APPLE)
