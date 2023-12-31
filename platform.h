@@ -17,6 +17,8 @@ struct Socket{
 	const char *read();
 	int write(const char *,int n);
 
+	int serve(struct Connection *service);
+
 	void listen(int port, int flags, void* user);
 
 //	int listen(struct Connection *service);

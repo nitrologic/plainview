@@ -71,10 +71,23 @@ void dumpModes() {
 	std::cout << std::endl;
 }
 
-Socket l(0);
+Socket *s;
+
+struct TestConnection:Connection{
+	virtual void onConnect(Socket* link, std::string address) {
+		std::cout << "onConnect" << std::endl;
+	}
+};
+
+TestConnection t;
+
+int testServe(){
+	s=Socket::open(8080,0);
+	s->serve(&t);
+}
 
 int testListen() {
-	l.listen(8080, 0, nullptr);
+//	l.listen(8080, 0, nullptr);
 	return 0;
 }
 
@@ -90,7 +103,8 @@ int main() {
 	std::cout << "plainview " << plainviewVersion << std::endl;
 
 //	int oscin = Socket::testOSCIn();
-	testListen();
+//	testListen();
+	testServe();
 
 //	testLoopback();
 

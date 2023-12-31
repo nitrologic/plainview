@@ -568,7 +568,13 @@ Socket *Socket::open(int port, int flags){
 
 #include <arpa/inet.h>
 
-int Socket::listen(Connection *service)
+void Socket::listen(int port, int flags, void* user){
+	std::cout << "listen not supported - please use serve connection api" << std::endl;
+}
+
+// listen and serve new connections from service
+
+int Socket::serve(Connection *service)
 {
 	int backlog=32;
 	int result=::listen(fd,backlog);
