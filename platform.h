@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 void initSystem();
 
 uint64_t cpuTime();
