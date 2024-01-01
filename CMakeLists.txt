@@ -58,3 +58,8 @@ endif(APPLE)
 if(UNIX)
 target_link_libraries(plainview SDL3-static curl)
 endif(UNIX)
+
+
+include(CTest)
+
+add_test(NAME plainview COMMAND plainview --test)

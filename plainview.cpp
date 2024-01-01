@@ -125,16 +125,22 @@ int main() {
 
 //	int oscin = Socket::testOSCIn();
 //	testListen();
-	testServe();
+//	testServe();
 //	testPing();
-
 //	testLoopback();
 
 	Driver *sdlDriver = sdlOpen();
+
+	if(sdlDriver==nullptr){
+		std::cout << "sdlDriver failure" << std::endl;
+		return 1;
+	}
+
 //	dumpModes();
 	Engine* engine = new GL3Engine();
 	sdlDriver->setEngine(engine);
 	sdlDriver->test();
 	sdlDriver->quit();
+
 	return 0;
 }
