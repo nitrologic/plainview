@@ -1,4 +1,8 @@
+Undefined symbols for architecture x86_64:
+  "std::__1::basic_stringbuf<char, std::__1::char_traits<char>, std::__1::allocator<char> >::str() const", referenced from:
+      GLProgram::loadString(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >) in plainview.cpp.o
 
+      
 
 building on WSL:Ubuntu
 
