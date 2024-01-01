@@ -119,6 +119,12 @@ void initSystem() {
 	CoInitialize(NULL);
 }
 
+bool haveWinsock = false;
+
+void tidyUp() {
+	WSACleanup();
+}
+
 
 
 Socket::Socket(int descriptor) {
@@ -136,8 +142,6 @@ float peekf(void *p){
 	return *((float *)(&i));
 }
 
-
-bool haveWinsock=false;
 WSADATA wsaData;
 
 bool initWinsock(){
@@ -292,6 +296,23 @@ Socket* Socket::connect(const char *host,int port){
 	return new Socket(s);
 }
 
+int Socket::accept() {
+
+	SOCKET listen = fd;
+
+	SOCKET s = INVALID_SOCKET;
+
+	s = ::accept(listen, NULL, NULL);
+
+	if (s == INVALID_SOCKET) {
+		std::cout << "Socket accept fail " << WSAGetLastError() << std::endl;
+		closesocket(s);
+		return 1;
+	}
+
+	return 0;
+}
+
 void Socket::listen(int port, int flags, void *user){	
 
 	if (!initWinsock()){
@@ -326,12 +347,16 @@ void Socket::listen(int port, int flags, void *user){
 		return;
 	}
 
+	// https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-listen
+
 	if (::listen(s, SOMAXCONN) == SOCKET_ERROR){
 		wprintf(L"listen function failed with error: %d\n", WSAGetLastError());
 		return;
 	}
 
 	std::cout << "listening on port " << (int)port << std::endl;
+
+	fd = s;
 
 #ifdef sockets_stay_closed
 	result = closesocket(s);
@@ -387,24 +412,22 @@ int Socket::serve(Connection* service) {
 
 	std::cout << "serving" << std::endl;
 
-	int fd2 = ::listen(s, SOMAXCONN);
+	int listening = ::listen(s, SOMAXCONN);
 
-	if ( fd2 == SOCKET_ERROR) {
+	if ( listening == SOCKET_ERROR) {
 		wprintf(L"listen function failed with error: %d\n", WSAGetLastError());
 		return 0;
 	}
 
 	sockaddr_in from = { 0 };
 	socklen_t len = sizeof(sockaddr_in);
+	SOCKET s2 = ::accept(s, (sockaddr*) & from, &len);
 
-	Socket* link = new Socket(fd2);
-
+	Socket* link = new Socket(s2);
 	if (service) {
 		std::string address(inet_ntoa(from.sin_addr));
 		service->onConnect(link, address);
 	}
-
-
 
 	return 0;
 }

@@ -91,8 +91,11 @@ void startServe(){
 //	std::thread 
 }
 
+Socket l(0);
+
 int testListen() {
-//	l.listen(8080, 0, nullptr);
+	l.listen(8080, 0, nullptr);
+	int accept = l.accept();
 	return 0;
 }
 
@@ -119,8 +122,8 @@ int main() {
 
 //	int oscin = Socket::testOSCIn();
 //	testListen();
-//	testServe();
-	testPing();
+	testServe();
+//	testPing();
 
 //	testLoopback();
 

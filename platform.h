@@ -25,6 +25,9 @@ struct Socket{
 
 	void listen(int port, int flags, void* user);
 
+	int accept();
+
+
 //	int listen(struct Connection *service);
 
 	void close();
