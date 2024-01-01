@@ -40,6 +40,10 @@ jobs:
             c_compiler: clang
             cpp_compiler: clang++
         exclude:
+          - os: macos-latest
+            c_compiler: gcc        
+          - os: macos-latest
+            c_compiler: cl        
           - os: windows-latest
             c_compiler: gcc
           - os: windows-latest
