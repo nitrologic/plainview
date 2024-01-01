@@ -62,7 +62,7 @@ jobs:
 
     - name: Install xcode tools
       if: runner.os == 'macOS'
-      run: sudo xcode-select --install
+      run: sudo xcode-select --version
       
       #-s '/Applications/Xcode_12.1.app/Contents/Developer'
         
