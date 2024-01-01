@@ -10,6 +10,11 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -std:c++17")
 add_definitions( -DWIN32 )
 endif(WIN32)
 
+if(UNIX)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -std=c++17")
+# add_definitions( -D__MACOSX_CORE__ )
+endif(UNIX)
+
 set(BUILD_SHARED_LIBS OFF)
 
 #add_subdirectory(glfw)
@@ -49,3 +54,7 @@ endif(WIN32)
 if(APPLE)
 target_link_libraries(plainview SDL3-static curl)
 endif(APPLE)
+
+if(UNIX)
+target_link_libraries(plainview SDL3-static curl)
+endif(UNIX)

@@ -653,6 +653,7 @@ Socket *Socket::open(int port, int flags){
 
 int Socket::accept() {
 	std::cout << "accept not supported - please use serve connection api" << std::endl;
+	return 0;
 }
 
 
@@ -692,7 +693,7 @@ int Socket::serve(Connection *service)
 			service->onConnect(link,address);
 		}
 	}
-	
+	return 0;
 }
 
 Socket::Socket(int64_t descriptor){
