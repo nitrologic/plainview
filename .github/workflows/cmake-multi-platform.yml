@@ -68,9 +68,8 @@ jobs:
       if: runner.os == 'macOS'
       run: |
         sudo xcode-select --reset
-        sudo xcode-select --install
-      
-      #-s '/Applications/Xcode_12.1.app/Contents/Developer'
+#       sudo xcode-select --install
+#  -s '/Applications/Xcode_12.1.app/Contents/Developer'
         
       
     - name: Set reusable strings
