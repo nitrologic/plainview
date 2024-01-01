@@ -16,9 +16,11 @@ struct Socket{
 	static Socket* open(int port, int flags);
 
 	Socket(int descriptor);
+
 	virtual ~Socket();
 	
 	const char *read();
+
 	int write(const char *,int n);
 
 	int serve(struct Connection *service);
@@ -95,3 +97,5 @@ struct Device {
 		}
 	}
 };
+
+Device *openSocket(std::string address, Socket *s);

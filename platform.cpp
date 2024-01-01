@@ -672,6 +672,11 @@ Socket *Socket::open(int port, int flags){
 
 #include <arpa/inet.h>
 
+int Socket::accept() {
+	std::cout << "accept not supported - please use serve connection api" << std::endl;
+}
+
+
 void Socket::listen(int port, int flags, void* user){
 	std::cout << "listen not supported - please use serve connection api" << std::endl;
 }
@@ -694,7 +699,7 @@ int Socket::serve(Connection *service)
 		socklen_t len=sizeof(sockaddr_in);
 	
 		int fd2;
-		fd2=accept(fd,(sockaddr *) &from,&len);
+		fd2 = ::accept(fd,(sockaddr *) &from,&len);
 
 		if(fd2<0){
 			printf("Socket::accept fd2=%d\n",fd2);
@@ -916,3 +921,36 @@ void pingHost(const char* userAgent, const char* hostName, int hostPort) {
 }
 
 #endif
+
+
+struct HttpConnection:Device {
+
+	int _socket;
+	std::string _address;
+
+	HttpConnection(std::string address, int socket){
+		_socket = socket;
+		_address = address;
+		Open("http:");
+	}
+
+	virtual void CloseDevice() {
+
+	}
+	virtual void onRead(Bytes payload) {
+		
+	}
+	virtual size_t readBytes(void* buffer, size_t length) {
+		return 0;
+	}
+	virtual size_t writeBytes(const void* buffer, size_t length) {
+		return 0;
+	}
+
+};
+
+
+Device *openSocket(std::string from, Socket *s){
+	return new HttpConnection(from, s->fd);
+}
+

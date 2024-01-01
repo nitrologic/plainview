@@ -73,9 +73,12 @@ void dumpModes() {
 
 Socket *s;
 
+
+
 struct TestConnection:Connection{
 	virtual void onConnect(Socket* link, std::string address) {
 		std::cout << "onConnect" << std::endl;
+		Device *connection = openSocket(address,link);
 	}
 };
 
