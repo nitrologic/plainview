@@ -29,6 +29,7 @@ jobs:
         include:
           - os: macos-latest
             c_compiler: gcc
+            cxx_compiler: g++
             cpp_compiler: g++
           - os: windows-latest
             c_compiler: cl
