@@ -106,8 +106,8 @@ int testLoopback() {
 
 int testPing(){
 //	pingHost(L"PlainViewPeer", L"localhost", 8080);
-	pingHost(L"PlainViewPeer", L"google.com", 80);
-
+//	pingHost(L"PlainViewPeer", L"google.com", 80);
+	pingHost("PlainViewPeer", "example.com", 80);
 	return 0;
 }
 

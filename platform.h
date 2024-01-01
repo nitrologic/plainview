@@ -4,7 +4,7 @@ void initSystem();
 
 uint64_t cpuTime();
 
-void pingHost(const wchar_t* userAgent, const wchar_t* hostName, int hostPort);
+void pingHost(const char* userAgent, const char* hostName, int hostPort);
 
 struct Socket{
 	static const int BufferSize=0x10000+1;	// 64K fragment setting for IP with post read null terminator

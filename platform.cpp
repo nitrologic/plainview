@@ -762,10 +762,34 @@ void Socket::close(){
 
 #include <winhttp.h>
 
+#include <codecvt>
+#include <locale>
+#include <utility>
+#include <fstream>
+#include <iomanip>
+
+
+// utility wrapper to adapt locale-bound facets for wstring/wbuffer convert
+template<class Facet>
+struct deletable_facet : Facet
+{
+	template<class ...Args>
+	deletable_facet(Args&& ...args) : Facet(std::forward<Args>(args)...) {}
+	~deletable_facet() {}
+};
+
+std::wstring_convert<deletable_facet<std::codecvt<wchar_t, char, std::mbstate_t>>, wchar_t> conv16;
+
+std::wstring WideFromUtf8(const char *data) {
+	std::wstring result;
+	std::wstring wstr = conv16.from_bytes(data);
+	return wstr;
+}
+
 const int BufferSize = 8192 * 1024;
 char pszOutBuffer[8192 * 1024];
 
-void pingHost(const wchar_t* userAgent, const wchar_t* hostName, int hostPort) {
+void pingHost(const char* _userAgent, const char* _hostName, int hostPort) {
 
 	DWORD flags = WINHTTP_FLAG_ESCAPE_PERCENT;
 	DWORD dwSize = 0;
@@ -775,13 +799,19 @@ void pingHost(const wchar_t* userAgent, const wchar_t* hostName, int hostPort) {
 		hConnect = NULL,
 		hRequest = NULL;
 
+	const std::wstring userAgent = WideFromUtf8(_userAgent);
+	const std::wstring hostName = WideFromUtf8(_hostName);
+//	const wchar_t* hostName
+
+
 	// Use WinHttpOpen to obtain a session handle.
 //	hSession = WinHttpOpen(L"WinHTTP pingHost/1.0",WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,WINHTTP_NO_PROXY_NAME,WINHTTP_NO_PROXY_BYPASS, 0);
-	hSession = WinHttpOpen(userAgent, WINHTTP_ACCESS_TYPE_NO_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
+
+	hSession = WinHttpOpen(userAgent.c_str(), WINHTTP_ACCESS_TYPE_NO_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
 
 	// Specify an HTTP server.
 	if (hSession)
-		hConnect = WinHttpConnect(hSession, hostName, hostPort, 0);
+		hConnect = WinHttpConnect(hSession, hostName.c_str(), hostPort, 0);
 
 	const wchar_t* accept[] = { L"application/json",0 };//	WINHTTP_DEFAULT_ACCEPT_TYPES;
 	// Create an HTTP request handle.
@@ -839,14 +869,14 @@ void pingHost(const wchar_t* userAgent, const wchar_t* hostName, int hostPort) {
 #include <curl/curl.h>
 
 
-void pingHost(const wchar_t* userAgent, const wchar_t* hostName, int hostPort)
-{
+void pingHost(const char* userAgent, const char* hostName, int hostPort) {
+
   CURL *curl;
   CURLcode res;
  
   curl = curl_easy_init();
   if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+    curl_easy_setopt(curl, CURLOPT_URL, hostName);
     /* example.com is redirected, so we tell libcurl to follow redirection */
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
  
