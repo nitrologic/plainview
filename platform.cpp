@@ -125,9 +125,7 @@ void tidyUp() {
 	WSACleanup();
 }
 
-
-
-Socket::Socket(int descriptor) {
+Socket::Socket(int64_t descriptor) {
 	fd = descriptor;
 }
 
@@ -432,34 +430,15 @@ int Socket::serve(Connection* service) {
 	return 0;
 }
 
+int Socket::receive(char *buffer,int count){
 
-
-
-//Socket::Socket(int descriptor,void *userdata){
-//	fd=descriptor;
-//	user=userdata;
-//}
-
-const char *Socket::read(){
-	buffer[0] = 0;
-
-	int result = recv(fd, buffer, BufferSize, 0);
-	if (result > 0){
-		printf("Bytes received: %d\n", result);
-		buffer[result] = 0;
-	}else if (result == 0){
-		printf("Connection closed\n");
-		return 0;
-	}else{
-		printf("recv failed with error: %d\n", WSAGetLastError());
-		close();
-	}
-	return buffer;
+	int result = ::recv(fd, buffer, count, 0);
+	return result;
 }
 
-int Socket::write(const char *bytes,int count){	
+int Socket::send(const char *buffer,int count){	
 
-	int result = ::send(fd,bytes,count,0);
+	int result = ::send(fd,buffer,count,0);
 
 	if (result == SOCKET_ERROR) {
 		printf("send failed with error: %d\n", WSAGetLastError());
@@ -729,34 +708,14 @@ Socket::~Socket(){
 	}
 }
 
-const char *Socket::read(){
-	buffer[0]=0;
-	
-	ssize_t count=::recv(fd,buffer,BufferSize-1,0);	//MSG_DONTWAIT
-	if(count>0){
-		buffer[count]=0;
-//		printf("Socket::read count=%d\n",count);
-	}else{
-		if (count==0){
-			printf("Socket::read is end of stream\n",count);				
-			return 0;			
-		}
-		if (count==-1){
-			printf("Socket::read has error\n",count);
-			return 0;			
-		}
-	}
-	return buffer;
+int Socket::receive(char *buffer,int count){
+	ssize_t result = ::recv(fd, buffer, count, 0);	//MSG_DONTWAIT
+	return (int)result;
 }
 
-int Socket::write(const char *bytes,int count){
-	// todo: make me safe	
-	if (count==0){
-		count=strlen(bytes);
-	}
-	size_t result=::write(fd,bytes,count);	
-//	printf("Socket::write count=%d result=%d\n",count,result);	
-	return result;
+int Socket::send(const char *buffer,int count){
+	size_t result = ::write(fd, buffer, count);	
+	return (int)result;
 }
 	
 void Socket::close(){
@@ -765,22 +724,6 @@ void Socket::close(){
 }
 
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -923,12 +866,16 @@ void pingHost(const char* userAgent, const char* hostName, int hostPort) {
 #endif
 
 
-struct HttpConnection:Device {
 
-	int _socket;
+
+
+
+struct SocketConnection :Device {
+
+	Socket* _socket;
 	std::string _address;
 
-	HttpConnection(std::string address, int socket){
+	SocketConnection(std::string address, Socket* socket) {
 		_socket = socket;
 		_address = address;
 		Open("http:");
@@ -938,10 +885,11 @@ struct HttpConnection:Device {
 
 	}
 	virtual void onRead(Bytes payload) {
-		
+
 	}
 	virtual size_t readBytes(void* buffer, size_t length) {
-		return 0;
+		int result = _socket->receive((char*)buffer, length);
+		return (size_t)result;
 	}
 	virtual size_t writeBytes(const void* buffer, size_t length) {
 		return 0;
@@ -949,8 +897,6 @@ struct HttpConnection:Device {
 
 };
 
-
-Device *openSocket(std::string from, Socket *s){
-	return new HttpConnection(from, s->fd);
+Device* openSocket(std::string from, Socket* s) {
+	return new SocketConnection(from, s);
 }
-

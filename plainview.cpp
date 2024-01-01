@@ -78,7 +78,7 @@ Socket *s;
 struct TestConnection:Connection{
 	virtual void onConnect(Socket* link, std::string address) {
 		std::cout << "onConnect" << std::endl;
-		Device *connection = openSocket(address,link);
+		Device *connection = openSocket(address, link);
 	}
 };
 
@@ -105,7 +105,7 @@ int testListen() {
 int testLoopback() {
 	Socket* c = Socket::connect("localhost", 8080);
 	if (c == nullptr) return 1;
-	c->write("hell", 4);
+	c->send("hell", 4);
 	c->close();
 	return 0;
 }
@@ -138,5 +138,3 @@ int main() {
 	sdlDriver->quit();
 	return 0;
 }
-
-

@@ -7,21 +7,21 @@ uint64_t cpuTime();
 void pingHost(const char* userAgent, const char* hostName, int hostPort);
 
 struct Socket{
-	static const int BufferSize=0x10000+1;	// 64K fragment setting for IP with post read null terminator
-	char buffer[BufferSize];
-	int fd;
+	int64_t fd;
 
 	static Socket* connect(const char* host, int port);
 
 	static Socket* open(int port, int flags);
 
-	Socket(int descriptor);
+	Socket(int64_t descriptor);
 
 	virtual ~Socket();
 	
-	const char *read();
+//	const char *read();
 
-	int write(const char *,int n);
+	int receive(char *, int n);
+
+	int send(const char *,int n);
 
 	int serve(struct Connection *service);
 
