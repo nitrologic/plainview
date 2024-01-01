@@ -431,8 +431,8 @@ int Socket::serve(Connection* service) {
 }
 
 int Socket::receive(char *buffer,int count){
-
 	int result = ::recv(fd, buffer, count, 0);
+	std::cout << "::recv " << result << std::endl;
 	return result;
 }
 
@@ -710,11 +710,12 @@ Socket::~Socket(){
 
 int Socket::receive(char *buffer,int count){
 	ssize_t result = ::recv(fd, buffer, count, 0);	//MSG_DONTWAIT
+	std::cout << "::recv " << result << std::endl;
 	return (int)result;
 }
 
 int Socket::send(const char *buffer,int count){
-	size_t result = ::write(fd, buffer, count);	
+	size_t result = ::send(fd, buffer, count, 0);	
 	return (int)result;
 }
 	
