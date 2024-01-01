@@ -466,6 +466,10 @@ void Socket::close(){
 #include <sys/ioctl.h>
 #include <sys/uio.h>
 
+void initSystem(){
+	
+}
+
 // on nonzero result input prints string version of errno
 
 bool posixError(int result){
@@ -830,9 +834,12 @@ void pingHost(const wchar_t* userAgent, const wchar_t* hostName, int hostPort) {
 	if (hSession) WinHttpCloseHandle(hSession);
 }
 
+#else
+
 #include <curl/curl.h>
- 
-void pingHost(const wchar_t* userAgent, const wchar_t* hostName, int hostPort) {
+
+
+void pingHost(const wchar_t* userAgent, const wchar_t* hostName, int hostPort)
 {
   CURL *curl;
   CURLcode res;

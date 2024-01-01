@@ -87,6 +87,10 @@ int testServe(){
 	return 0;
 }
 
+void startServe(){
+//	std::thread 
+}
+
 int testListen() {
 //	l.listen(8080, 0, nullptr);
 	return 0;
@@ -100,18 +104,23 @@ int testLoopback() {
 	return 0;
 }
 
+int testPing(){
+//	pingHost(L"PlainViewPeer", L"localhost", 8080);
+	pingHost(L"PlainViewPeer", L"google.com", 80);
+
+	return 0;
+}
+
 int main() {
 
 	initSystem();
-
-//	pingHost(L"PlainViewPeer", L"localhost", 8080);
-//	pingHost(L"PlainViewPeer", L"google.com", 80);
 
 	std::cout << "plainview " << plainviewVersion << std::endl;
 
 //	int oscin = Socket::testOSCIn();
 //	testListen();
-	testServe();
+//	testServe();
+	testPing();
 
 //	testLoopback();
 
