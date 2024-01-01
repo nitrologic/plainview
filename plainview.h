@@ -1,5 +1,16 @@
 #pragma once
 
+#include <cstdint>
+#include <iostream>
+#include <string>
+#include <map>
+#include <vector>
+#include <set>
+
+#define _USE_MATH_DEFINES
+#include <math.h>
+
+
 /*
 
 plainview.h
@@ -11,15 +22,6 @@ Copyright © 2023 Simon Armstrong
 All Rights Reserved
 
 */
-
-#include <iostream>
-#include <string>
-#include <map>
-#include <vector>
-#include <set>
-
-#define _USE_MATH_DEFINES
-#include <math.h>
 
 struct Rect32 {
 	int x,y,w,h;

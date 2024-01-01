@@ -6,6 +6,18 @@ A plain view of the modern monitor video display landscape
 	* OpenGL bindings courtesy Glad Loader-Generator 
 	* SDL_CocoaOpenGL movedToNewScreen patch courtesy Simon Armstrong
 
+# dependencies
+
+## WSL:Ubuntu
+
+sudo apt update && sudo apt upgrade
+
+sudo apt install libcurl4-openssl-dev
+
+sudo apt install g++ gdb make cmake
+
+sudo apt install gcc-arm-none-eabi
+
 ## Latest
 
 ![plainview version 0.4](plainview3.png)

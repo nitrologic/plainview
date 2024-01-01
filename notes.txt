@@ -1,3 +1,31 @@
+
+
+building on WSL:Ubuntu
+
+sudo apt install libcurl4-openssl-dev
+sudo apt update && sudo apt upgrade
+sudo apt install g++ gdb make
+sudo apt install gcc-arm-none-eabi
+
+
+-- Could NOT find PkgConfig (missing: PKG_CONFIG_EXECUTABLE) 
+-- Could NOT find ALSA (missing: ALSA_LIBRARY ALSA_INCLUDE_DIR) 
+-- Could NOT find X11 (missing: X11_X11_INCLUDE_PATH X11_X11_LIB) 
+-- Could NOT find OpenGL (missing: OPENGL_opengl_LIBRARY OPENGL_glx_LIBRARY OPENGL_INCLUDE_DIR) 
+-- 
+-- SDL3 was configured with the following options:
+-- 
+-- Platform: Linux-5.15.133.1-microsoft-standard-WSL2
+-- 64-bit:   TRUE
+-- Compiler: /usr/bin/cc
+-- Revision: SDL-prerelease-3.0.0-3006-ged3fad188
+-- Vendor:   
+
+
+
+
+
+
 ## Window manager evaluation
 
 ### SDL 3
