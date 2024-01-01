@@ -695,7 +695,7 @@ int Socket::serve(Connection *service)
 	
 }
 
-Socket::Socket(int descriptor){
+Socket::Socket(int64_t descriptor){
 	fd=descriptor;
 // make non blocking
 //	int iMode=1;
