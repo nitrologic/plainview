@@ -43,7 +43,7 @@ ADD_EXECUTABLE(plainview
 )
 
 if(WIN32)
-target_link_libraries(plainview SDL3-static Ws2_32 Mswsock Advapi32)
+target_link_libraries(plainview SDL3-static Ws2_32 Mswsock Advapi32 WinHttp)
 endif(WIN32)
 
 if(APPLE)

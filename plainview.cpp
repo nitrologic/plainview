@@ -84,6 +84,7 @@ TestConnection t;
 int testServe(){
 	s=Socket::open(8080,0);
 	s->serve(&t);
+	return 0;
 }
 
 int testListen() {
@@ -100,6 +101,12 @@ int testLoopback() {
 }
 
 int main() {
+
+	initSystem();
+
+//	pingHost(L"PlainViewPeer", L"localhost", 8080);
+//	pingHost(L"PlainViewPeer", L"google.com", 80);
+
 	std::cout << "plainview " << plainviewVersion << std::endl;
 
 //	int oscin = Socket::testOSCIn();
@@ -116,3 +123,5 @@ int main() {
 	sdlDriver->quit();
 	return 0;
 }
+
+

@@ -112,6 +112,15 @@ void processOSC(char *packet, int length){
 
 #endif
 
+
+#include <objbase.h>
+
+void initSystem() {
+	CoInitialize(NULL);
+}
+
+
+
 Socket::Socket(int descriptor) {
 	fd = descriptor;
 }
@@ -332,6 +341,74 @@ void Socket::listen(int port, int flags, void *user){
 	}
 #endif
 }
+
+
+Socket* Socket::open(int port, int flags) {
+//	return nullptr;
+
+	if (!initWinsock()) {
+		return nullptr;
+	}
+
+	SOCKET s = INVALID_SOCKET;
+
+	int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
+	if (result != NO_ERROR) {
+		wprintf(L"WSAStartup() failed with error: %d\n", result);
+		return nullptr;
+	}
+
+	s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (s == INVALID_SOCKET) {
+		wprintf(L"socket function failed with error: %ld\n", WSAGetLastError());
+		return nullptr;
+	}
+
+	sockaddr_in service;
+	service.sin_family = AF_INET;
+	service.sin_addr.s_addr = inet_addr("127.0.0.1");
+	service.sin_port = htons(port);
+
+	result = bind(s, (SOCKADDR*)&service, sizeof(service));
+	if (result == SOCKET_ERROR) {
+		wprintf(L"bind function failed with error %d\n", WSAGetLastError());
+		result = closesocket(s);
+		if (result == SOCKET_ERROR)
+			wprintf(L"closesocket function failed with error %d\n", WSAGetLastError());
+		return  nullptr;
+	}
+
+	return new Socket(s);
+}
+
+int Socket::serve(Connection* service) {
+
+	SOCKET s = fd;
+
+	std::cout << "serving" << std::endl;
+
+	int fd2 = ::listen(s, SOMAXCONN);
+
+	if ( fd2 == SOCKET_ERROR) {
+		wprintf(L"listen function failed with error: %d\n", WSAGetLastError());
+		return 0;
+	}
+
+	sockaddr_in from = { 0 };
+	socklen_t len = sizeof(sockaddr_in);
+
+	Socket* link = new Socket(fd2);
+
+	if (service) {
+		std::string address(inet_ntoa(from.sin_addr));
+		service->onConnect(link, address);
+	}
+
+
+
+	return 0;
+}
+
 
 
 
@@ -653,6 +730,129 @@ int Socket::write(const char *bytes,int count){
 void Socket::close(){
 	::close(fd);
 	fd=0;
+}
+
+#endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#ifdef WIN32
+
+
+
+#include <winhttp.h>
+
+const int BufferSize = 8192 * 1024;
+char pszOutBuffer[8192 * 1024];
+
+void pingHost(const wchar_t* userAgent, const wchar_t* hostName, int hostPort) {
+
+	DWORD flags = WINHTTP_FLAG_ESCAPE_PERCENT;
+	DWORD dwSize = 0;
+	DWORD dwDownloaded = 0;
+	BOOL  bResults = FALSE;
+	HINTERNET  hSession = NULL,
+		hConnect = NULL,
+		hRequest = NULL;
+
+	// Use WinHttpOpen to obtain a session handle.
+//	hSession = WinHttpOpen(L"WinHTTP pingHost/1.0",WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,WINHTTP_NO_PROXY_NAME,WINHTTP_NO_PROXY_BYPASS, 0);
+	hSession = WinHttpOpen(userAgent, WINHTTP_ACCESS_TYPE_NO_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
+
+	// Specify an HTTP server.
+	if (hSession)
+		hConnect = WinHttpConnect(hSession, hostName, hostPort, 0);
+
+	const wchar_t* accept[] = { L"application/json",0 };//	WINHTTP_DEFAULT_ACCEPT_TYPES;
+	// Create an HTTP request handle.
+	if (hConnect)
+		hRequest = WinHttpOpenRequest(hConnect, L"GET", NULL, NULL, WINHTTP_NO_REFERER, accept, flags);
+
+	// Send a request.
+	if (hRequest)
+		bResults = WinHttpSendRequest(hRequest,
+			WINHTTP_NO_ADDITIONAL_HEADERS, 0,
+			WINHTTP_NO_REQUEST_DATA, 0,
+			0, 0);
+
+
+	// End the request.
+	if (bResults)
+		bResults = WinHttpReceiveResponse(hRequest, NULL);
+
+	// Keep checking for data until there is nothing left.
+
+	if (bResults)
+	{
+		do
+		{
+			dwSize = 0;
+			BOOL ok = WinHttpQueryDataAvailable(hRequest, &dwSize);
+			if (ok) {
+				DWORD size = dwSize < BufferSize ? dwSize : BufferSize - 1;
+				ok = WinHttpReadData(hRequest, (LPVOID)pszOutBuffer, size, &dwDownloaded);
+				if (ok) {
+					pszOutBuffer[size] = 0;
+					std::cout << pszOutBuffer << std::endl;
+				}
+				else {
+					std::cout << "WinHttpReadData error " << GetLastError() << std::endl;
+				}
+			}
+			else {
+				std::cout << "WinHttpQueryDataAvailable error " << GetLastError() << std::endl;
+			}
+		} while (dwSize > 0);
+	}
+	// Report any errors.
+	if (!bResults)
+		std::cout << "WinHttpReceiveResponse error " << GetLastError() << std::endl;
+
+	// Close any open handles.
+	if (hRequest) WinHttpCloseHandle(hRequest);
+	if (hConnect) WinHttpCloseHandle(hConnect);
+	if (hSession) WinHttpCloseHandle(hSession);
+}
+
+#include <curl/curl.h>
+ 
+void pingHost(const wchar_t* userAgent, const wchar_t* hostName, int hostPort) {
+{
+  CURL *curl;
+  CURLcode res;
+ 
+  curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+    /* example.com is redirected, so we tell libcurl to follow redirection */
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+ 
+    /* Perform the request, res will get the return code */
+    res = curl_easy_perform(curl);
+    /* Check for errors */
+    if(res != CURLE_OK)
+      fprintf(stderr, "curl_easy_perform() failed: %s\n",
+              curl_easy_strerror(res));
+ 
+    /* always cleanup */
+    curl_easy_cleanup(curl);
+  }
 }
 
 #endif
