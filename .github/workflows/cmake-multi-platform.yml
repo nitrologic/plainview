@@ -29,7 +29,6 @@ jobs:
         include:
           - os: macos-latest
             c_compiler: gcc
-            cxx_compiler: g++
             cpp_compiler: g++
           - os: windows-latest
             c_compiler: cl
@@ -63,7 +62,7 @@ jobs:
 
     - name: Install xcode tools
       if: runner.os == 'macOS'
-      run: sudo xcode-select --version
+      run: sudo xcode-select --reset
       
       #-s '/Applications/Xcode_12.1.app/Contents/Developer'
         
