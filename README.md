@@ -8,6 +8,7 @@ A plain view of the modern monitor video display landscape
 
 # dependencies
 
+
 ## WSL:Ubuntu
 
 sudo apt update && sudo apt upgrade
