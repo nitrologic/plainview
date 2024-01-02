@@ -12,9 +12,9 @@ A plain view of the modern monitor video display landscape
 
 sudo apt update && sudo apt upgrade
 
-sudo apt install libcurl4-openssl-dev
-
 sudo apt install g++ gdb make cmake
+
+sudo apt install libcurl4-openssl-dev
 
 sudo apt install gcc-arm-none-eabi
 

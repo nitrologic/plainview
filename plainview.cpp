@@ -129,6 +129,8 @@ int main() {
 //	testPing();
 //	testLoopback();
 
+#ifdef RUN_TEST
+
 	Driver *sdlDriver = sdlOpen();
 
 	if(sdlDriver==nullptr){
@@ -141,6 +143,7 @@ int main() {
 	sdlDriver->setEngine(engine);
 	sdlDriver->test();
 	sdlDriver->quit();
+#endif
 
 	return 0;
 }
