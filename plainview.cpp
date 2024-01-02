@@ -117,11 +117,17 @@ int testPing(){
 	return 0;
 }
 
+#include "plainbox2d.h"
+
+//#include <box2d/box2d.h>
+
 int main() {
 
 	initSystem();
 
 	std::cout << "plainview " << plainviewVersion << std::endl;
+
+	Box2DSim *sim = new Box2DSim();
 
 //	int oscin = Socket::testOSCIn();
 //	testListen();

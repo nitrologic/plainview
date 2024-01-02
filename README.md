@@ -6,6 +6,16 @@ A plain view of the modern monitor video display landscape
 	* OpenGL bindings courtesy Glad Loader-Generator 
 	* SDL_CocoaOpenGL movedToNewScreen patch courtesy Simon Armstrong
 
+## Latest
+
+![plainview version 0.4](plainview3.png)
+
+	* box2d experiments
+	* support for GLFW 3 removed
+	* big ups to SDL3 for managing OpenGL 3.2 GLSL 3.30 so well
+
+
+
 # dependencies
 
 
@@ -19,18 +29,10 @@ sudo apt install libcurl4-openssl-dev
 
 sudo apt install gcc-arm-none-eabi
 
-## Latest
-
-![plainview version 0.4](plainview3.png)
-
-	* support for GLFW 3 removed
-	* big ups to SDL3 for managing OpenGL 3.2 GLSL 3.30 so well
-
 ## Credits
-
-GLFW3 3.4.0
-Copyright (c) 2002-2006 Marcus Geelnard
-Copyright (c) 2006-2019 Camilla Löwy 
 
 SDL 3.0
 Copyright (C) 1997-2023 Sam Lantinga
+
+box2d 2.4.1
+Copyright (c) 2019 Erin Catto

@@ -19,6 +19,7 @@ set(BUILD_SHARED_LIBS OFF)
 
 #add_subdirectory(glfw)
 add_subdirectory(SDL)
+add_subdirectory(box2d)
 
 # project plainview 
 # (c) Simon Armstrong 2023 
@@ -29,6 +30,7 @@ project(plainview)
 include_directories(
     glfw/include
     SDL/include
+    box2d/include
 )
 
 ADD_EXECUTABLE(plainview
@@ -48,7 +50,7 @@ ADD_EXECUTABLE(plainview
 )
 
 if(WIN32)
-target_link_libraries(plainview SDL3-static Ws2_32 Mswsock Advapi32 WinHttp)
+target_link_libraries(plainview box2d SDL3-static Ws2_32 Mswsock Advapi32 WinHttp)
 endif(WIN32)
 
 if(APPLE)
