@@ -34,6 +34,7 @@ include_directories(
 )
 
 ADD_EXECUTABLE(plainview
+    plainbox2d.h
     platform.h
     platform.cpp
     glad/gl.h
