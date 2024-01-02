@@ -6,7 +6,11 @@ A plain view of the modern monitor video display landscape
 	* OpenGL bindings courtesy Glad Loader-Generator 
 	* SDL_CocoaOpenGL movedToNewScreen patch courtesy Simon Armstrong
 
-## Latest
+# Build Status
+
+[![Build Status](https://github.com/nitrologic/plainview/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/nitrologic/plainview/actions)
+
+# Latest
 
 ![plainview version 0.4](plainview3.png)
 
