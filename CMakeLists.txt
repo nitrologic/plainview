@@ -15,15 +15,11 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -std=c++17")
 # add_definitions( -D__MACOSX_CORE__ )
 endif(UNIX)
 
-set(BUILD_SHARED_LIBS OFF)
-
-#add_subdirectory(glfw)
-
-add_subdirectory(SDL)
-
+unset(BUILD_SHARED_LIBS)
 unset(BOX2D_BUILD_UNIT_TESTS)
 unset(BOX2D_BUILD_TESTBED)
 
+add_subdirectory(SDL)
 add_subdirectory(box2d)
 
 # project plainview 
