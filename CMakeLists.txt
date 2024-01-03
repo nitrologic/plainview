@@ -60,11 +60,11 @@ target_link_libraries(plainview box2d SDL3-static Ws2_32 Mswsock Advapi32 WinHtt
 endif(WIN32)
 
 if(APPLE)
-target_link_libraries(plainview SDL3-static curl)
+target_link_libraries(plainview box2d SDL3-static curl)
 endif(APPLE)
 
 if(UNIX)
-target_link_libraries(plainview SDL3-static curl)
+target_link_libraries(plainview box2d SDL3-static curl)
 endif(UNIX)
 
 
