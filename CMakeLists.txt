@@ -15,9 +15,9 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -std=c++17")
 # add_definitions( -D__MACOSX_CORE__ )
 endif(UNIX)
 
-set(BUILD_SHARED_LIBS "" OFF)
-set(BOX2D_BUILD_UNIT_TESTS "" OFF)
-set(BOX2D_BUILD_TESTBED "" OFF)
+option(BUILD_SHARED_LIBS "" OFF)
+option(BOX2D_BUILD_UNIT_TESTS "" OFF)
+option(BOX2D_BUILD_TESTBED "" OFF)
 
 add_subdirectory(SDL)
 add_subdirectory(box2d)
