@@ -21,8 +21,8 @@ set(BUILD_SHARED_LIBS OFF)
 
 add_subdirectory(SDL)
 
-set(BOX2D_BUILD_UNIT_TESTS OFF)
-set(BOX2D_BUILD_TESTBED OFF)
+unset(BOX2D_BUILD_UNIT_TESTS)
+unset(BOX2D_BUILD_TESTBED)
 
 add_subdirectory(box2d)
 
