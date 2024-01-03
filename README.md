@@ -1,24 +1,21 @@
 # plainview
 
+[![Build Status](https://github.com/nitrologic/plainview/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/nitrologic/plainview/actions)
+
 A plain view of the modern monitor video display landscape
 
 	* display device management courtesy SDL3 
 	* OpenGL bindings courtesy Glad Loader-Generator 
-	* SDL_CocoaOpenGL movedToNewScreen patch courtesy Simon Armstrong
-
-# Build Status
-
-[![Build Status](https://github.com/nitrologic/plainview/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/nitrologic/plainview/actions)
 
 # Latest
 
 ![plainview version 0.4](plainview3.png)
 
-	* box2d experiments
+	* some box2d experiments
+	* a proprietary GL3Engine implementation
+	* an SDL_CocoaOpenGL movedToNewScreen patch - see notes.txt for application
 	* support for GLFW 3 removed
 	* big ups to SDL3 for managing OpenGL 3.2 GLSL 3.30 so well
-
-
 
 # dependencies
 
