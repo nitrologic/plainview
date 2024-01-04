@@ -8,7 +8,7 @@ A plain view of the modern monitor video display landscape
 	* display device management courtesy SDL3 
 	* OpenGL bindings courtesy Glad Loader-Generator 
 
-# Latest
+## Latest
 
 	* github workflow added for macos ubuntu windows
 	* a proprietary GL3Engine implementation
@@ -16,11 +16,22 @@ A plain view of the modern monitor video display landscape
 	* support for GLFW 3 removed
 	* big ups to SDL3 for managing OpenGL 3.2 GLSL 3.30 so well
 
-# Coming Soon
+## Coming Soon
 
 	* some box2d experiments 
 	* vector font
 	* remote host 1
+
+## References
+
+OpenGL 3.2
+
+https://www.khronos.org/files/opengl-quick-reference-card.pdf
+
+GLSL 3.3
+
+https://registry.khronos.org/OpenGL/specs/gl/GLSLangSpec.3.30.pdf
+
 
 # Gallery
 

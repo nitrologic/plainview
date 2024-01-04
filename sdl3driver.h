@@ -6,6 +6,8 @@
 
 #include <SDL3/SDL.h>
 
+#define USE_OPENGL_3_2
+
 struct SDLDriver : Driver {
 
 //	GL4Engine engine;
@@ -22,10 +24,10 @@ struct SDLDriver : Driver {
         SDL_GetVersion(&version);
         std::cout << "SDL " << (int)version.major << "." << (int)version.minor << "." << (int)version.patch << std::endl;
         
-		// 3.2 or 4.0
-
+#ifdef USE_OPENGL_3_2
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+#endif
 
 //		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES );
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
