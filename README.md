@@ -10,8 +10,6 @@ A plain view of the modern monitor video display landscape
 
 # Latest
 
-![plainview version 0.4](plainview3.png)
-
 	* github workflow added for macos ubuntu windows
 	* a proprietary GL3Engine implementation
 	* an SDL_CocoaOpenGL movedToNewScreen patch - see notes.txt for application
@@ -24,8 +22,11 @@ A plain view of the modern monitor video display landscape
 	* vector font
 	* remote host 1
 
-# dependencies
+# Gallery
 
+![plainview version 0.4](plainview3.png)
+
+# dependencies
 
 ## WSL:Ubuntu
 
