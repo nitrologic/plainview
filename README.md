@@ -1,6 +1,7 @@
-# plainview
-
 [![Build Status](https://github.com/nitrologic/plainview/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/nitrologic/plainview/actions)
+[![Build Status](https://github.com/nitrologic/plainview/actions/workflows/cmake-ubuntu.yml/badge.svg)](https://github.com/nitrologic/plainview/actions)
+
+# plainview
 
 A plain view of the modern monitor video display landscape
 
