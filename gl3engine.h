@@ -350,6 +350,13 @@ struct GL3Engine : Engine {
 	int test() {
         const char* version = (const char *)glGetString(GL_SHADING_LANGUAGE_VERSION);
         std::cout << "GL_SHADING_LANGUAGE_VERSION : " << version << std::endl;
+
+		int maxgeom;
+		
+		glGetIntegerv(GL_MAX_GEOMETRY_OUTPUT_VERTICES, &maxgeom);
+//		const char* maxgeom = (const char*)glGetString(GL_MAX_GEOMETRY_OUTPUT_VERTICES);
+		std::cout << "GL_MAX_GEOMETRY_OUTPUT_VERTICES : " << maxgeom << std::endl;
+
 		program.build();
 		return 0;
 	}

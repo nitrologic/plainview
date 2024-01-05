@@ -20,6 +20,10 @@ static bool terminateApp = false;
 
 #include "platform.h"
 
+#ifndef __unix__
+#define RUN_TEST
+#endif
+
 Monitors allMonitors;
 Monitor NullMonitor;
 
@@ -127,10 +131,12 @@ int main() {
 
 	std::cout << "plainview " << plainviewVersion << std::endl;
 
-	Box2DSim *sim = new Box2DSim();
+//	Box2DSim *sim = new Box2DSim();
 
 //	int oscin = Socket::testOSCIn();
-//	testListen();
+//	int oscout = Socket::testOSCOut();
+
+	//	testListen();
 //	testServe();
 //	testPing();
 //	testLoopback();

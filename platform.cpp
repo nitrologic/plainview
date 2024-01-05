@@ -163,7 +163,7 @@ int Socket::testOSCIn(){
 
 	char buffer[549];
 
-	u_short hostPort = 7000;
+	u_short hostPort = 7001;
 
 	s= socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if (s == INVALID_SOCKET){
