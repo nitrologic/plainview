@@ -20,7 +20,7 @@ static bool terminateApp = false;
 
 #include "platform.h"
 
-#ifndef __unix__
+#ifndef __unix2_
 #define RUN_TEST
 #endif
 
@@ -127,9 +127,16 @@ int testPing(){
 
 int main() {
 
+	uint64_t t = cpuTime();
+
 	initSystem();
 
 	std::cout << "plainview " << plainviewVersion << std::endl;
+
+	t=cpuTime()-t;
+
+	std::cout << "elapsed micros " << t << std::endl;
+
 
 //	Box2DSim *sim = new Box2DSim();
 
