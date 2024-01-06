@@ -20,7 +20,7 @@ static bool terminateApp = false;
 
 #include "platform.h"
 
-#ifndef __unix2_
+#ifndef __unix_
 #define RUN_TEST
 #endif
 
@@ -162,7 +162,9 @@ int main() {
 	sdlDriver->setEngine(engine);
 	sdlDriver->test();
 	sdlDriver->quit();
-#endif
 
 	return 0;
+#endif
+
+	return 1;
 }
