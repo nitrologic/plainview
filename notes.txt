@@ -1,3 +1,6 @@
+sudo apt install gcc-arm-none-eabi
+
+
 GL_MAX_GEOMETRY_OUTPUT_VERTICES
 
 
@@ -445,3 +448,4 @@ GLFW Generic PnP Monitor 0,0,3840,2064
                 1152 x 864
                 1280 x 960
                 1280 x 1024
+

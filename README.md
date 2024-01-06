@@ -39,6 +39,12 @@ https://registry.khronos.org/OpenGL/specs/gl/GLSLangSpec.3.30.pdf
 
 # dependencies
 
+## Plain Ubuntu
+
+sudo apt install libxext-dev
+
+sudo apt install libcurl4-openssl-dev
+
 ## WSL:Ubuntu
 
 sudo apt update && sudo apt upgrade
@@ -46,8 +52,6 @@ sudo apt update && sudo apt upgrade
 sudo apt install g++ gdb make cmake
 
 sudo apt install libcurl4-openssl-dev
-
-sudo apt install gcc-arm-none-eabi
 
 ## Credits
 
