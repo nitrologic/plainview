@@ -20,7 +20,7 @@ static bool terminateApp = false;
 
 #include "platform.h"
 
-#ifndef __unix_
+#ifndef __unix__
 #define RUN_TEST
 #endif
 
