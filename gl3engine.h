@@ -65,9 +65,10 @@ struct GLDisplay {
 
 		glEnableVertexAttribArray(xyz);
 		glVertexAttribPointer(xyz, 3, GL_INT, GL_FALSE, 0, 0);
-
+#ifdef _BITS
 		glEnableVertexAttribArray(bits);
 		glVertexAttribPointer(bits, 1, GL_INT, GL_FALSE, 0, (void *)(maxQuads * 3 * 4) );
+#endif
 	}
 
 
@@ -167,7 +168,9 @@ struct GLProgram {
 		check();
 		// fetch attributes
 		xyz = attribute("xyz");
+#ifdef _BITS
 		bits = attribute("bits");
+#endif
 		view = uniform("view");
 		palette = uniform("palette");
 		// setup display
@@ -264,7 +267,7 @@ struct GLProgram {
 		i32 a = glGetAttribLocation(program1, name);
 		check();
 		if (a == -1) {
-			std::cout << "GLProgram:attribute " << name << " not found" << std::endl;
+			std::cout << "[GLProgram] attribute \"" << name << "\" not found" << std::endl;
 		}
 		return a;
 	}
@@ -273,7 +276,7 @@ struct GLProgram {
 		i32 a = glGetUniformLocation(program1, name);
 		check();
 		if (a == -1) {
-			std::cout << "GLProgram:uniform " << name << " not found" << std::endl;
+			std::cout << "[GLProgram] uniform \"" << name << "\" not found" << std::endl;
 		}
 		return a;
 	}
@@ -287,9 +290,16 @@ struct GLProgram {
 		i32 shader2 = loadShader(GL_FRAGMENT_SHADER, fragmentGles.data(), fragmentGles.length());
 		check();
 
+		std::string geometryGles = loadString("shaders/rayGeometry.glsl");
+		i32 shader3 = loadShader(GL_GEOMETRY_SHADER, geometryGles.data(), geometryGles.length());
+		check();
+
 		i32 program1 = glCreateProgram();
+
 		glAttachShader(program1, shader1);
+		glAttachShader(program1, shader3);
 		glAttachShader(program1, shader2);
+
 		check();
 
 		glLinkProgram(program1);

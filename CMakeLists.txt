@@ -45,6 +45,7 @@ ADD_EXECUTABLE(plainview
     plainview.cpp
 # shaders
     shaders/rayFragment.glsl
+    shaders/rayGeometry.glsl
     shaders/rayVertex.glsl
 # documentation
     notes.txt
