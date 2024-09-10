@@ -16,11 +16,12 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -std=c++17")
 endif(UNIX)
 
 option(BUILD_SHARED_LIBS "" OFF)
-option(BOX2D_BUILD_UNIT_TESTS "" OFF)
-option(BOX2D_BUILD_TESTBED "" OFF)
+
+#option(BOX2D_BUILD_UNIT_TESTS "" OFF)
+#option(BOX2D_BUILD_TESTBED "" OFF)
 
 add_subdirectory(SDL)
-add_subdirectory(box2d)
+#add_subdirectory(box2d)
 
 # project plainview 
 # (c) Simon Armstrong 2023 
@@ -31,11 +32,11 @@ project(plainview)
 include_directories(
     glfw/include
     SDL/include
-    box2d/include
+#   box2d/include
 )
 
 ADD_EXECUTABLE(plainview
-    plainbox2d.h
+#   plainbox2d.h
     platform.h
     platform.cpp
     glad/gl.h
@@ -53,15 +54,15 @@ ADD_EXECUTABLE(plainview
 )
 
 if(WIN32)
-target_link_libraries(plainview box2d SDL3-static Ws2_32 Mswsock Advapi32 WinHttp)
+target_link_libraries(plainview SDL3-static Ws2_32 Mswsock Advapi32 WinHttp)
 endif(WIN32)
 
 if(APPLE)
-target_link_libraries(plainview box2d SDL3-static curl)
+target_link_libraries(plainview SDL3-static curl)
 endif(APPLE)
 
 if(UNIX)
-target_link_libraries(plainview box2d SDL3-static curl)
+target_link_libraries(plainview SDL3-static curl)
 endif(UNIX)
 
 
