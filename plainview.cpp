@@ -48,7 +48,8 @@ Driver* sdlOpen() {
 		//		std::cout << "display #" << i << " \"" << name << "\" " << rect.x << "," << rect.y << "," << rect.w<< "," << rect.h << " x" << scale << std::endl;
 		addMonitor("SDL", name, scale, rect.x, rect.y, rect.w, rect.h);
 		int modeCount;
-		const SDL_DisplayMode** modes = SDL_GetFullscreenDisplayModes(displayId, &modeCount);
+		
+		SDL_DisplayMode** modes = SDL_GetFullscreenDisplayModes(displayId, &modeCount);
 		while (const SDL_DisplayMode* mode = *modes++) {
 			//			std::cout << mode->w << "," << mode->h << " @" << mode->refresh_rate << "hz ";
 			//			std::cout << " x" << mode->pixel_density;

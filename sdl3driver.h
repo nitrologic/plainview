@@ -20,9 +20,7 @@ struct SDLDriver : Driver {
             std::cout << "SDL failure" << std::endl;
             return;
         }
-        SDL_version version;
-        SDL_GetVersion(&version);
-        std::cout << "SDL " << (int)version.major << "." << (int)version.minor << "." << (int)version.patch << std::endl;
+        std::cout << "SDL " << (int)SDL_MAJOR_VERSION  << "." << (int)SDL_MINOR_VERSION << "." << (int)SDL_MICRO_VERSION << std::endl;
         
 #ifdef USE_OPENGL_3_2
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -105,7 +103,7 @@ struct SDLDriver : Driver {
 		int w, h;
 		SDL_GetWindowSizeInPixels(window, &w, &h);
 
-		int period = 48;
+		int period = 148;
 		int wide = 7;
 		int high = 24;
 		int x = 10 + frameCount % period;
@@ -194,7 +192,7 @@ struct SDLDriver : Driver {
 					fullscreen(0,FULLSCREEN);
 				}break;
 				case SDL_EVENT_KEY_DOWN:{
-					SDL_Keysym key = event.key.keysym;
+					SDL_KeyboardEvent &key = event.key;
 					if (key.scancode == SDL_SCANCODE_F1) {
 						fullscreen(0,TOGGLE_FULLSCREEN);
 					}

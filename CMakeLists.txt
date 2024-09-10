@@ -6,7 +6,7 @@ add_definitions( -D__MACOSX_CORE__ )
 endif(APPLE)
 
 if(WIN32)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -std:c++17")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -std=c++17")
 add_definitions( -DWIN32 )
 endif(WIN32)
 
