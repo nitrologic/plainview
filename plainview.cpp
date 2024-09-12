@@ -122,7 +122,7 @@ int testPing(){
 	return 0;
 }
 
-#include "plainbox2d.h"
+//#include "plainbox2d.h"
 
 //#include <box2d/box2d.h>
 

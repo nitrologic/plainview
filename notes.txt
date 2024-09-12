@@ -12,6 +12,8 @@ Undefined symbols for architecture x86_64:
 
 building on WSL:Ubuntu
 
+sudo apt install libxext-dev
+
 sudo apt install libcurl4-openssl-dev
 sudo apt update && sudo apt upgrade
 sudo apt install g++ gdb make
