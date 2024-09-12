@@ -325,7 +325,7 @@ struct GLProgram {
 		return program1;
 	}
 
-	i32 loadShader(GLenum shaderType,char *src, int bytes) {
+	i32 loadShader(GLenum shaderType,const char *src, int bytes) {
 		u32 shader = glCreateShader(shaderType);
 		const c8* sources[] = { src,0 };
 		i32 lengths[] = {bytes,0};
