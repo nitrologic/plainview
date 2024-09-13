@@ -1,5 +1,17 @@
 cmake_minimum_required(VERSION 3.5)
 
+option(BUILD_SHARED_LIBS "" OFF)
+
+#option(BOX2D_BUILD_UNIT_TESTS "" OFF)
+#option(BOX2D_BUILD_TESTBED "" OFF)
+
+add_subdirectory(SDL)
+#add_subdirectory(box2d)
+
+
+message("### PROJECT_SOURCE_DIR ${PROJECT_SOURCE_DIR}")
+message("### CMAKE_CXX_COMPILER_ID ${CMAKE_CXX_COMPILER_ID}")
+
 if(APPLE)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -std=c++17")
 add_definitions( -D__MACOSX_CORE__ )
@@ -15,42 +27,40 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -std=c++17")
 # add_definitions( -D__MACOSX_CORE__ )
 endif(UNIX)
 
-option(BUILD_SHARED_LIBS "" OFF)
-
-#option(BOX2D_BUILD_UNIT_TESTS "" OFF)
-#option(BOX2D_BUILD_TESTBED "" OFF)
-
-add_subdirectory(SDL)
-#add_subdirectory(box2d)
-
 # project plainview 
 # (c) Simon Armstrong 2023 
 # all rights reserved
 
-project(plainview)
+project(plainview
+	VERSION 0.0.0
+	DESCRIPTION "plainview SDL2 development harness"
+	HOMEPAGE_URL "https://github.com/nitrologic/plainview"
+	LANGUAGES C CXX ASM
+)
 
 include_directories(
-    glfw/include
-    SDL/include
+	glfw/include
+	SDL/include
 #   box2d/include
 )
 
 ADD_EXECUTABLE(plainview
+	plainshaders.s
 #   plainbox2d.h
-    platform.h
-    platform.cpp
-    glad/gl.h
-    sdl3driver.h
-    gl3engine.h
-    plainview.h
-    plainview.cpp
+	platform.h
+	platform.cpp
+	glad/gl.h
+	sdl3driver.h
+	gl3engine.h
+	plainview.h
+	plainview.cpp
 # shaders
-    shaders/rayFragment.glsl
-    shaders/rayGeometry.glsl
-    shaders/rayVertex.glsl
+	shaders/rayFragment.glsl
+	shaders/rayGeometry.glsl
+	shaders/rayVertex.glsl
 # documentation
-    notes.txt
-    README.md
+	notes.txt
+	README.md
 )
 
 if(WIN32)

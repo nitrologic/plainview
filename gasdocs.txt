@@ -1,0 +1,855 @@
+From: "A.Appleyard" <A.APPLEYARD@fs2.mt.umist.ac.uk>
+To: dj
+Date: Thu, 24 Aug 1995 10:04:07 BST
+Subject: GAS manual in ascii
+Priority: normal
+X-Mailer: Pegasus Mail v3.22
+DJ-Mail-Sort: djgpp, djgpp
+
+  Herewith djgpp\docs\gas\as.tex converted to ascii. I have removed the matter
+that does not seem to refer to the IBM PC. Please check it through first in
+case I went astray anywhere among a tangle of Tex @if --- @end and suchlike.
+It is now 1510 lines long.
+  ............................................
+
+[The GNU Assembler for the IBM PC family] [January 1994]
+  This file is a user guide to the Gnu assembler `GAS'. This version of the
+file describes `GAS' configured to generate code for IBM PC architectures.
+
+  =================================================
+[Overview]
+
+Here is a brief summary of how to invoke `GAS'. For details, see Invoking
+Command Line Options.
+  GAS [ -a[dhlns] ] [ -D ] [ -f ] [ -I <path> ] [ -K ] [ -L ] [ -o <objfile> ]
+  [ -R ] [ --statistics] [ -v ] [ -W ] [ -Z ] [ -- | <files> ... ]
+-a[dhlns]       Turn on listings, in any of a variety of ways:-
+-ad             omit debugging directives from listing
+-ah             include high-level source
+-al             assembly listing
+-an             no forms processing
+-as             symbols
+  You may combine these options; for example, use `-aln' for assembly listing
+without forms processing. By itself, `-a' defaults to `-ahls' - that is, all
+listings turned on.
+
+-D      This option is accepted only for script compatibility with calls to
+        other assemblers; it has no effect on `GAS'.
+-f      ``fast''---skip whitespace and comment preprocessing (assume source is
+        compiler output)
+-I <path>       Add <path> to the search list for `.include' directives
+-K      According to version, this option may or may not issue warnings when difference tables altered for long displacements.
+-L      Keep (in symbol table) local symbols, starting with `L'
+-o <objfile>    Name the object-file output from `GAS'
+-R      Fold data section into text section
+--statistics    Display maximum space (in bytes), and total time (in seconds), taken by
+        assembly.
+-v      Announce `as' version
+-W      Suppress warning messages
+-Z      Generate object file even after errors
+--      Standard input
+<files> ...     Source files to assemble.
+
+  --------------------------------------------------------
+[Structure of this Manual]
+  This manual is intended to describe what you need to know to use Gnu `GAS'.
+We cover the syntax expected in source files, including notation for symbols,
+constants, and expressions; the directives that `GAS' understands; and of
+course how to invoke `GAS'. We also cover special features in the IBM PC
+configuration of `GAS', including assembler directives. On the other hand,
+this manual is NOT intended as an introduction to programming in assembly
+language---let alone programming in general! In a similar vein, we make no
+attempt to introduce the machine architecture; we do NOT describe the
+instruction set, standard mnemonics, registers or addressing modes that are
+standard to a particular architecture.
+
+  --------------------------------------------------------
+[GAS, the GNU Assembler]
+  Gnu `as' is really a family of assemblers. This manual describes `GAS', a
+member of that family which is configured for the IBM PC architectures. If you
+use (or have used) the Gnu assembler on one architecture, you should find a
+fairly similar environment when you use it on another architecture. Each
+version has much in common with the others, including object file formats,
+most assembler directives (often called `pseudo-ops') and assembler syntax.
+`GAS' is primarily intended to assemble the output of the Gnu C compiler `GCC'
+for use by the linker `LD'. Nevertheless, we've tried to make `GAS' assemble
+correctly everything that other assemblers for the same machine would
+assemble. Unlike older assemblers, `GAS' is designed to assemble a source
+program in one pass of the source file. This has a subtle impact on the `.org'
+directive (see Org,,`.org').
+
+  --------------------------------------------------------
+[Object File Formats]
+  The Gnu assembler can be configured to produce several alternative object
+file formats. For the most part, this does not affect how you write assembly
+language programs; but directives for debugging symbols are typically
+different in different file formats. See Symbol Attributes. On the IBM PC,
+`GAS' is configured to produce `a.out' format object files.
+
+  --------------------------------------------------------
+[Command Line]
+  After the program name `GAS', the command line may contain options and file
+names. Options may appear in any order, and may be before, after, or between
+file names. The order of file names is significant.
+  `--' (two hyphens) by itself names the standard input file explicitly, as
+one of the files for `GAS' to assemble.
+  Except for `--' any command line argument that begins with a hyphen (`-') is
+an option. Each option changes the behavior of `GAS'. No option changes the
+way another option works. An option is a `-' followed by one or more letters;
+the case of the letter is important. All options are optional.
+  Some options expect exactly one file name to follow them. The file name may
+either immediately follow the option's letter (compatible with older
+assemblers) or it may be the next command argument (Gnu standard). These two
+command lines are equivalent:
+    GAS -o my-object-file.o mumble.s
+    GAS -omy-object-file.o mumble.s
+
+  --------------------------------------------------------
+[Input Files]
+  We use the phrase `source program', abbreviated `source', to describe the
+program input to one run of `GAS'. The program may be in one or more files;
+how the source is partitioned into files doesn't change the meaning of the
+source. The source program is a concatenation of the text in all the files, in
+the order specified. Each time you run `GAS' it assembles exactly one source
+program. The source program is made up of one or more files. (The standard
+input is also a file.)
+  You give `GAS' a command line that has zero or more input file names. The
+input files are read (from left file name to right). A command line argument
+(in any position) that has no special meaning is taken to be an input file
+name. If you give `GAS' no file names it attempts to read one input file from
+the `GAS' standard input, which is normally your terminal. You may have to
+type `ctrl-D' to tell `GAS' there is no more program to assemble. Use `--' if
+you need to explicitly name the standard input file in your command line. If
+the source is empty, `GAS' produces a small, empty object file.
+
+  --------------------------------------------------------
+[Filenames and Line-numbers]
+  There are two ways of locating a line in the input file (or files) and
+either may be used in reporting error messages. One way refers to a line
+number in a physical file; the other refers to a line number in a ``logical''
+file. See Errors, ,Error and Warning Messages.
+  `Physical files' are those files named in the command line given to `GAS'.
+  `Logical files' are simply names declared explicitly by assembler
+directives; they bear no relation to physical files. Logical file names help
+error messages reflect the original source file, when `GAS' source is itself
+synthesized from other files. See App-File,,`.app-file'.
+
+  --------------------------------------------------------
+[Output (Object) File]
+  Every time you run `GAS' it produces an output file, which is your assembly
+language program translated into numbers. This file is the object file. Its
+default name is `a.out'. You can give it another name by using the `-o'
+option. Conventionally, object file names end with `.o'. The default name is
+used for historical reasons: older assemblers were capable of assembling
+self-contained programs directly into a runnable program. (For some formats,
+this isn't currently possible, but it can be done for the `a.out' format.)
+  The object file is meant for input to the linker `LD'. It contains assembled
+program code, information to help `LD' integrate the assembled program into a
+runnable file, and (optionally) symbolic information for the debugger.
+
+  --------------------------------------------------------
+[Error and Warning Messages]
+  `GAS' may write warnings and error messages to the standard error file
+(usually your terminal). This should not happen when  a compiler runs `GAS'
+automatically. Warnings report an assumption made so that `GAS' could keep
+assembling a flawed program; errors report a grave problem that stops the
+assembly. Warning messages have the format
+    file_name:<NNN>:Warning Message Text
+  (where <NNN> is a line number). If a logical file name has been given (see
+App-File,,`.app-file') it is used for the filename, otherwise the name of the
+current input file is used. If a logical line number was given, then it is
+used to calculate the number printed, otherwise the actual line in the current
+source file is printed. The message text is intended to be self explanatory
+(in the grand Unix tradition). Error messages have the format
+    file_name:<NNN>:FATAL:Error Message Text
+  The file name and line number are derived as for warning messages. The
+actual message text may be rather less explanatory because many of them aren't
+supposed to happen.
+
+  =================================================
+[Command-Line Options]
+  This chapter describes command-line options available in ALL versions of the
+Gnu assembler; see Machine Dependencies, for options specific to particular
+machine architectures. If you are invoking `GAS' via the Gnu C compiler
+(version 2), you can use the `-Wa' option to pass arguments through to the
+assembler. The assembler arguments must be separated from each other (and the
+`-Wa') by commas. For example:
+    gcc -c -g -O -Wa,-alh,-L file.c
+ emits a listing to standard output with high-level and assembly source.
+Usually you do not need to use this `-Wa' mechanism, since many compiler
+command-line options are automatically passed to the assembler by the
+compiler. (You can call the Gnu compiler driver with the `-v' option to see
+precisely what options it passes to each compilation pass, including the
+assembler.)
+
+  --------------------------------------------------------
+[Enable Listings: `-a[dhlns]']
+  These options enable listing output from the assembler. By itself, `-a'
+requests high-level, assembly, and symbols listing. You can use other letters
+to select specific options for the list: `-ah' requests a high-level language
+listing, `-al' requests an output-program assembly listing, and `-as' requests
+a symbol table listing. High-level listings require that a compiler debugging
+option like `-g' be used, and that assembly listings (`-al') be requested
+also. Use the `-ad' option to omit debugging directives from the listing.
+  Once you have specified one of these options, you can further control
+listing output and its appearance using the directives `.list', `.nolist',
+`.psize', `.eject', `.title', and `.sbttl'. The `-an' option turns off all
+forms processing. If you do not request listing output with one of the `-a'
+options, the listing-control directives have no effect.
+  The letters after `-a' may be combined into one option, E.G., `-aln'.
+
+  --------------------------------------------------------
+[`-D']
+  This option has no effect whatsoever, but it is accepted to make it more
+likely that scripts written for other assemblers also work with `GAS'.
+
+  --------------------------------------------------------
+[Work Faster: `-f']
+  `-f' should only be used when assembling programs written by a (trusted)
+compiler. `-f' stops the assembler from doing whitespace and comment
+preprocessing on the input file(s) before assembling them. See Preprocessing:
+if you use `-f' when the files actually need to be preprocessed (if they
+contain comments, for example), `GAS' does not work correctly.
+
+  --------------------------------------------------------
+[`.include' search path: `-I' <path>]
+  Use this option to add a <path> to the list of directories `GAS' searches
+for files specified in `.include' directives (see Include,,`.include'). You
+may use `-I' as many times as necessary to include a variety of paths. The
+current working directory is always searched first; after that, `GAS' searches
+any `-I' directories in the same order as they were specified (left to right)
+on the command line.
+
+  --------------------------------------------------------
+[Difference Tables: `-K']
+  According to version (the `DIFF-TBL-KLUGE'), `GAS' may or may not sometimes
+alter the code emitted for directives of the form `.word <sym1>-<sym2>'; see
+Word,,`.word'. You can use the `-K' option if you want a warning issued when
+this is done.
+
+  --------------------------------------------------------
+[Include Local Labels: `-L']
+  Labels beginning with `L' (upper case only) are called `local labels'. See
+Symbol Names. Normally you do not see such labels when debugging, because they
+are intended for the use of programs (like compilers) that compose assembler
+programs, not for your notice. Normally both `GAS' and `LD' discard such
+labels, so you do not normally debug with them. This option tells `GAS' to
+retain those `L...' symbols in the object file. Usually if you do this you
+also tell the linker `LD' to preserve symbols whose names begin with `L'. y
+default, a local label is any label beginning with `L', but each target is
+allowed to redefine the local label prefix.
+
+  --------------------------------------------------------
+[Name the Object File: `-o']
+  There is always one object file output when you run `GAS'. By default it has
+the name `a.out'. You use this option (which takes exactly one filename) to
+give the object file a different name. Whatever the object file is called,
+`GAS' overwrites any existing file of the same name.
+
+  --------------------------------------------------------
+[Join Data and Text Sections: `-R']
+  `-R' tells `GAS' to write the object file as if all data-section data lives
+in the text section. This is only done at the very last moment:  your binary
+data are the same, but data section parts are relocated differently. The data
+section part of your object file is zero bytes long because all its bytes are
+appended to the text section. (See Sections,,Sections and Relocation.) When
+you specify `-R' it would be possible to generate shorter address
+displacements (because we do not have to cross between text and data section).
+We refrain from doing this simply for compatibility with older versions of
+`GAS'. In future, `-R' may work this way.
+
+  --------------------------------------------------------
+[Display Assembly Statistics: `--statistics']
+  Use `--statistics' to display two statistics about the resources used by
+`GAS': the maximum amount of space allocated during the assembly (in bytes),
+and the total execution time taken for the assembly (in `cpu' seconds).
+
+  --------------------------------------------------------
+[Announce Version: `-v']
+  You can find out what version of as is running by including the option `-v'
+(which you can also spell as `-version') on the command line.
+
+  --------------------------------------------------------
+[Suppress Warnings: `-W']
+  `GAS' should never give a warning or error message when assembling compiler
+output. But programs written by people often cause `GAS' to give a warning
+that a particular assumption was made. All such warnings are directed to the
+standard error file. If you use this option, no warnings are issued. This
+option only affects the warning messages: it does not change any particular of
+how `GAS' assembles your file. Errors, which stop the assembly, are still
+reported.
+
+  --------------------------------------------------------
+[Generate Object File in Spite of Errors: `-Z']
+  After an error message, `GAS' normally produces no output. If for some
+reason you are interested in object file output even after `GAS' gives an
+error message on your program, use the `-Z' option. If there are any errors,
+`GAS' continues anyways, and writes an object file after a final warning
+message of the form `<n> errors, <m> warnings, generating bad object file.'
+
+  =================================================
+[Syntax]
+  This chapter describes the machine-independent syntax allowed in a source
+file. `GAS' syntax is similar to what many other assemblers use; it is
+inspired by the BSD 4.2 assembler.
+
+  --------------------------------------------------------
+[Preprocessing]
+  The `GAS' internal preprocessor:-
+  - Adjusts and removes extra whitespace. It leaves one space or tab before
+the keywords on a line, and turns any other whitespace on the line into a
+single space.
+  - Removes all comments, replacing them with a single space, or an
+appropriate number of newlines.
+  - converts character constants into the appropriate numeric values.
+  It does not do macro processing, include file handling, or anything else you
+may get from your C compiler's preprocessor. You can do include file
+processing with the `.include' directive (see Include,,`.include'). You can
+use the Gnu C compiler driver to get other ``CPP'' style preprocessing, by
+giving the input file a `.S' suffix. See Overall Options,, Options Controlling
+the Kind of Output, gcc.info, Using GNU CC.
+  Excess whitespace, comments, and character constants cannot be used in the
+portions of the input text that are not preprocessed.
+  If the first line of an input file is `#NO_APP' or if you use the `-f'
+option, whitespace and comments are not removed from the input file. Within an
+input file, you can ask for whitespace and comment removal in specific
+portions of the by putting a line that says `#APP' before the text that may
+contain whitespace or comments, and putting a line that says `#NO_APP' after
+this text. This feature is mainly intend to support `asm' statements in
+compilers whose output is otherwise free of comments and whitespace.
+
+  --------------------------------------------------------
+[Whitespace]
+  `Whitespace' is one or more blanks or tabs, in any order. Whitespace is used
+to separate symbols, and to make programs neater for people to read. Unless
+within character constants (see Characters,,Character Constants), any
+whitespace means the same as exactly one space.
+
+  --------------------------------------------------------
+[Comments]
+  There are two ways of rendering comments to `GAS'. In both cases the comment
+is equivalent to one space. Anything from `/*' to the next `*/' is a comment.
+This means you may not nest these comments. The only way to include a newline
+in a comment is to use a /* */ comment.
+  Anything from the `line comment' character to the next newline is considered
+a comment and is ignored. The line comment character is
+  To be compatible with past assemblers, lines that begin with `#' have a
+special interpretation. Following the `#' should be an absolute expression
+(see Expressions): the logical line number of the NEXT line. Then a string
+(see Strings,, Strings) is allowed: if present it is a new logical file name.
+The rest of the line, if any, should be whitespace.
+  If the first non-whitespace characters on the line are not numeric, the line
+is ignored. (Just like a comment.)
+
+                              # This is an ordinary comment.
+    # 42-6 "new_file_name"    # New logical file name
+                              # This is logical line # 36.
+  This feature is deprecated, and may disappear from future versions of `GAS'.
+
+  --------------------------------------------------------
+[Symbols]
+  No symbol may begin with a digit. Case is significant. There is no length
+limit: all characters are significant. Symbols are delimited by characters not
+in that set, or by the beginning of a file (since the source program must end
+with a newline, the end of a file is not a possible symbol delimiter). See
+Symbols.
+
+  --------------------------------------------------------
+[Statements]
+  A `statement' ends at a newline character (`\n') or at a semicolon (`;').
+The newline or semicolon is considered part of the preceding statement.
+Newlines and semicolons within character constants are an exception: they do
+not end statements. It is an error to end any statement with end-of-file:  the
+last character of any input file should be a newline.
+  You may write a statement on more than one line if you put a backslash (`\')
+immediately in front of any newlines within the statement. When `GAS' reads a
+backslashed newline both characters are ignored. You can even put backslashed
+newlines in the middle of symbol names without changing the meaning of your
+source program.
+  An empty statement is allowed, and may include whitespace. It is ignored.
+  A statement begins with zero or more labels, optionally followed by a key
+symbol which determines what kind of statement it is. The key symbol
+determines the syntax of the rest of the statement. If the symbol begins with
+a dot `.' then the statement is an assembler directive: typically valid for
+any computer. If the symbol begins with a letter the statement is an assembly
+language `instruction': it assembles into a machine language instruction.
+  A label is a symbol immediately followed by a colon (`:'). Whitespace before
+a label or after a colon is permitted, but you may not have whitespace between
+a label's symbol and its colon. See Labels.
+    label:     .directive    followed by something
+    another_label:           # This is an empty statement.
+               instruction   operand_1, operand_2, ...
+
+  --------------------------------------------------------
+[Constants]
+  A constant is a number, written so that its value is known by
+inspection, without knowing any context. Like this:
+    .byte  74, 0112, 092, 0x4A, 0X4a, 'J, '\J # All the same value.
+    .ascii "Ring the bell\7"                  # A string constant.
+    .octa  0x123456789abcdef0123456789ABCDEF0 # A bignum.
+    .float 0f-314159265358979323846264338327\
+    95028841971.693993751E-40                 # - pi, a flonum.
+
+  ..............................................
+[Character Constants]
+  There are two kinds of character constants. A `character' stands for one
+character in one byte and its value may be used in numeric expressions. String
+constants (properly called string LITERALS) are potentially many bytes and
+their values may not be used in arithmetic expressions.
+
+  . . . . . . . . . . . . . . . . . . . . . . .
+[Strings]
+  A `string' is written between double-quotes. It may contain double-quotes or
+null characters. The way to get special characters into a string is to
+`escape' these characters: precede them with a backslash `\' character. For
+example `\\' represents one backslash:  the first `\' is an escape which tells
+`GAS' to interpret the second character literally as a backslash (which
+prevents `GAS' from recognizing the second `\' as an escape character). The
+complete list of escapes follows.
+
+\b      Mnemonic for backspace; for ASCII this is octal code 010.
+\f      Mnemonic for FormFeed; for ASCII this is octal code 014.
+\n      Mnemonic for newline; for ASCII this is octal code 012.
+\r      Mnemonic for carriage-Return; for ASCII this is octal code 015.
+\t      Mnemonic for horizontal Tab; for ASCII this is octal code 011.
+\ <digit> <digit> <digit>       An octal character code. The numeric code is 3
+        octal digits. For compatibility with other Unix systems, 8 and 9 are
+        accepted as digits: for example, `\008' has the value 010, and `\009'
+        the value 011.
+\\      Represents one `\' character.
+\"      Represents one `"' character. Needed in strings to represent this
+        character, because an unescaped `"' would end the string.
+\ <anything-else>
+        Any other character when escaped by `\' gives a warning, but assembles
+as if the `\' was not present. The idea is that if you used an escape sequence
+you clearly didn't want the literal interpretation of the following character.
+However `GAS' has no other interpretation, so `GAS' knows it is giving you the
+wrong code and warns you of the fact. Which characters are escapable, and what
+those escapes represent, varies widely among assemblers. The current set is
+what we think the BSD 4.2 assembler recognizes, and is a subset of what most C
+compilers recognize. If you are in doubt, do not use an escape sequence.
+
+  . . . . . . . . . . . . . . . . . . . . . . .
+[Characters]
+  A single character may be written as a single quote immediately followed by
+that character. The same escapes apply to characters as to strings. So if you
+want to write the character backslash, you must write `'\\' where the first
+`\' escapes the second `\'. As you can see, the quote is an acute accent, not
+a grave accent. A newline (or semicolon `;') immediately following an acute
+accent is taken as a literal character and does not count as the end of a
+statement. The value of a character constant in a numeric expression is the
+machine's byte-wide code for that character. `GAS' assumes your character code
+is ASCII: `'A' means 65, `'B' means 66, and so on.
+
+  ..............................................
+[Number Constants]
+  `GAS' distinguishes three kinds of numbers according to how they are stored
+in the target machine. INTEGERS are numbers that would fit into an `int' in
+the C language. BIGNUMS are integers, but they are stored in more than 32
+bits. FLONUMS are floating point numbers, described below.
+
+  . . . . . . . . . . . . . . . . . . . . . . .
+[Integers]
+  A binary integer is `0b' or `0B' followed by zero or more of the binary
+digits `01'.
+  An octal integer is `0' followed by zero or more of the octal digits
+(`01234567').
+  A decimal integer starts with a non-zero digit followed by zero or more
+digits (`0123456789').
+  A hexadecimal integer is `0x' or `0X' followed by one or more hexadecimal
+digits chosen from `0123456789abcdefABCDEF'.
+  Integers have the usual values. To denote a negative integer, use the prefix
+operator `-' discussed under expressions (see Prefix Ops,,Prefix Operators).
+
+  . . . . . . . . . . . . . . . . . . . . . . .
+[Bignums]
+  A `bignum' has the same syntax and semantics as an integer except that the
+number (or its negative) takes more than 32 bits to represent in binary. The
+distinction is made because in some places integers are permitted while
+bignums are not.
+
+  . . . . . . . . . . . . . . . . . . . . . . .
+[Flonums]
+  A `flonum' represents a floating point number. The translation is indirect:
+a decimal floating point number from the text is converted by `GAS' to a
+generic binary floating point number of more than sufficient precision. This
+generic floating point number is converted to a particular computer's floating
+point format (or formats) by a portion of `GAS' specialized to that computer.
+A flonum is written by writing (in order)
+    The digit `0'.
+    A letter, to tell `GAS' the rest of the number is a flonum.
+        `e' is recommended. Case is not important.
+    An optional sign: either `+' or `-'.
+    An optional `integer part': zero or more decimal digits.
+    An optional `fractional part': `.' followed by zero or more decimal digits.
+    An optional exponent, consisting of:
+      An `E' or `e'.
+      Optional sign: either `+' or `-'.
+      One or more decimal digits.
+  At least one of the integer part or the fractional part must be present. The
+floating point number has the usual base-10 value. `GAS' does all processing
+using integers. Flonums are computed independently of any floating point
+hardware in the computer running `GAS'.
+
+  =================================================
+[Sections and Relocation]
+
+  --------------------------------------------------------
+[Background]
+  Roughly, a section is a range of addresses, with no gaps; all data ``in''
+those addresses is treated the same for some particular purpose. For example
+there may be a ``read only'' section.
+  The linker `LD' reads many object files (partial programs) and combines
+their contents to form a runnable program. When `GAS' emits an object file,
+the partial program is assumed to start at address 0. `LD' assigns the final
+addresses for the partial program, so that different partial programs do not
+overlap. This is actually an oversimplification, but it suffices to explain
+how `GAS' uses sections.
+  `LD' moves blocks of bytes of your program to their run-time addresses.
+These blocks slide to their run-time addresses as rigid units; their length
+does not change and neither does the order of bytes within them. Such a rigid
+unit is called a SECTION. Assigning run-time addresses to sections is called
+`relocation'. It includes the task of adjusting mentions of object-file
+addresses so they refer to the proper run-time addresses.
+  An object file written by `GAS' has at least three sections, any of which
+may be empty. These are named `text', `data' and `bss' sections.
+  Within the object file, the text section starts at address `0', the data
+section follows, and the bss section follows the data section.
+  To let `LD' know which data changes when the sections are relocated, and how
+to change that data, `GAS' also writes to the object file details of the
+relocation needed. To perform relocation `LD' must know, each time an address
+in the object file is mentioned:
+    Where in the object file is the beginning of this reference to an address?
+    How long (in bytes) is this reference?
+    Which section does the address refer to?  What is the numeric value of
+      (<address>) - (<start-address of section>)?
+    Is the reference to an address ``Program-Counter relative''?
+  In fact, every address `GAS' ever uses is expressed as
+      (<section>) + (<offset into section>)
+  Further, most expressions `GAS' computes have this section-relative nature.
+  In this manual we use the notation {<secname> <N>} to mean ``offset <N> into
+section <secname>.''
+  Apart from text, data and bss sections you need to know about the `absolute'
+section. When `LD' mixes partial programs, addresses in the absolute section
+remain unchanged. For example, address `{absolute 0}' is ``relocated'' to
+run-time address 0 by `LD'. Although the linker never arranges two partial
+programs' data sections with overlapping addresses after linking, BY
+DEFINITION their absolute sections must overlap. Address `{absolute 239}' in
+one part of a program is always the same address when the program is running
+as address `{absolute 239}' in any other part of the program.
+  The idea of sections is extended to the `undefined' section. Any address
+whose section is unknown at assembly time is by definition rendered {undefined
+<U>}---where <U> is filled in later. Since numbers are always defined, the
+only way to generate an undefined address is to mention an undefined symbol. A
+reference to a named common block would be such a symbol: its value is unknown
+at assembly time so it has section UNDEFINED.
+  By analogy the word SECTION is used to describe groups of sections in the
+linked program. `LD' puts all partial programs' text sections in contiguous
+addresses in the linked program. It is customary to refer to the TEXT SECTION
+of a program, meaning all the addresses of all partial programs' text
+sections. Likewise for data and bss sections.
+  Some sections are manipulated by `LD'; others are invented for use of `GAS'
+and have no meaning except during assembly.
+
+  --------------------------------------------------------
+[LD Sections]
+  `LD' deals with just four kinds of sections, summarized below. These
+sections hold your program. `GAS' and `LD' treat them as separate but equal
+sections. Anything you can say of one section is true another.
+
+  bss section: This section contains zeroed bytes when your program begins
+running. It is used to hold unitialized variables or common storage. The
+length of each partial program's bss section is important, but because it
+starts out containing zeroed bytes there is no need to store explicit zero
+bytes in the object file. The bss section was invented to eliminate those
+explicit zeros from object files.
+  absolute section: Address 0 of this section is always ``relocated'' to
+runtime address 0. This is useful if you want to refer to an address that `LD'
+must not change when relocating. In this sense we speak of absolute addresses
+being ``unrelocatable'': they do not change during relocation.
+  undefined section: This ``section'' is a catch-all for address references to
+objects not in the preceding sections. @end table
+  An idealized example of three relocatable sections follows. Memory addresses
+are on the horizontal axis.
+                          +-----+----+--+
+    partial program # 1:  |ttttt|dddd|00|
+                          +-----+----+--+
+                          text   data bss
+                          seg.   seg. seg.
+                          +---+---+---+
+    partial program # 2:  |TTT|DDD|000|
+                          +---+---+---+
+                          +--+---+-----+--+----+---+-----+~~
+    linked program:       |  |TTT|ttttt|  |dddd|DDD|00000|
+                          +--+---+-----+--+----+---+-----+~~
+        addresses:        0 ...
+  --------------------------------------------------------
+[GAS Internal Sections]
+  These sections are meant only for the internal use of `GAS'. They have no
+meaning at run-time. You do not really need to know about these sections for
+most purposes; but they can be mentioned in `GAS' warning messages, so it
+might be helpful to have an idea of their meanings to `GAS'. These sections
+are used to permit the value of every expression in your assembly language
+program to be a section-relative address.
+  ASSEMBLER-INTERNAL-LOGIC-ERROR!: An internal assembler logic error has been
+found. This means there is a bug in the assembler.
+  expr section: The assembler stores complex expression internally as
+combinations of symbols. When it needs to represent an expression as a symbol,
+it puts it in the expr section.
+
+  --------------------------------------------------------
+[Sub-Sections]
+  You may have separate groups of data in named sections that you want to end
+up near to each other in the object file, even though they are not contiguous
+in the assembler source. `GAS' allows you to use `subsections' for this
+purpose. Within each section, there can be numbered subsections with values
+>from 0 to 8192. Objects assembled into the same subsection go into the object
+file together with other objects in the same subsection. For example, a
+compiler might want to store constants in the text section, but might not want
+to have them interspersed with the program being assembled. In this case, the
+compiler could issue a `.text 0' before each section of code being output, and
+a `.text 1' before each group of constants being output.
+  Subsections are optional. If you do not use subsections, everything goes in
+subsection number zero.
+  Subsections appear in your object file in numeric order, lowest numbered to
+highest. (All this to be compatible with other people's assemblers.) The
+object file contains no representation of subsections; `LD' and other programs
+that manipulate object files see no trace of them. They just see all your text
+subsections as a text section, and all your data subsections as a data
+section.
+  To specify which subsection you want subsequent statements assembled into,
+use a numeric argument to specify it, in a `.text <expression>' or a `.data
+<expression>' statement. You can also use an extra subsection argument with
+arbitrary named sections: `.section <name>, <expression>'. <Expression> should
+be an absolute expression. (See Expressions.)  If you just say `.text' then
+`.text 0' is assumed. Likewise `.data' means `.data 0'. Assembly begins in
+`text 0'. For instance:
+    .text 0     # The default subsection is text 0 anyway.
+    .ascii "This lives in the first text subsection. *"
+    .text 1
+    .ascii "But this lives in the second text subsection."
+    .data 0
+    .ascii "This lives in the data section,"
+    .ascii "in the first data subsection."
+    .text 0
+    .ascii "This lives in the first text section,"
+    .ascii "immediately following the asterisk (*)."
+  Each section has a `location counter' incremented by one for every byte
+assembled into that section. Because subsections are merely a convenience
+restricted to `GAS' there is no concept of a subsection location counter.
+There is no way to directly manipulate a location counter---but the `.align'
+directive changes it, and any label definition captures its current value. The
+location counter of the section where statements are being assembled is said
+to be the `active' location counter.
+
+  --------------------------------------------------------
+[bss Section]
+  The bss section is used for local common variable storage. You may allocate
+address space in the bss section, but you may not dictate data to load into it
+before your program executes. When your program starts running, all the
+contents of the bss section are zeroed bytes.
+  Addresses in the bss section are allocated with special directives; you may
+not assemble anything directly into the bss section. Hence there are no bss
+subsections. See Comm,,`.comm', see Lcomm,,`.lcomm'.
+
+  =================================================
+[Symbols]
+  Symbols are a central concept: the programmer uses symbols to name things,
+the linker uses symbols to link, and the debugger uses symbols to debug.
+WARNING: `GAS' does not place symbols in the object file in the same order
+they were declared. This may break some debuggers.
+
+  --------------------------------------------------------
+[Labels]
+ `label' is written as a symbol immediately followed by a colon `:'. The
+symbol then represents the current value of the active location counter, and
+is, for example, a suitable instruction operand. You are warned if you use the
+same symbol to represent two different locations: the first definition
+overrides any other definitions.
+
+  --------------------------------------------------------
+[Giving Symbols Other Values]
+  A symbol can be given an arbitrary value by writing a symbol, followed by an
+equals sign `=', followed by an expression (see Expressions). This is
+equivalent to using the `.set' directive. See Set,,`.set'.
+
+  --------------------------------------------------------
+[Symbol Names]
+  Symbol names begin with a letter or with one of `._'. On most machines, you
+can also use `$' in symbol names; exceptions are noted in @ref{Machine
+Dependencies}. That character may be followed by any string of digits,
+letters, dollar signs (unless otherwise noted in `Machine Dependencies'), and
+underscores. Case of letters is significant: `foo' is a different symbol name
+than `Foo'. Each symbol has exactly one name. Each name in an assembly
+language program refers to exactly one symbol. You may use that symbol name
+any number of times in a program.
+
+  ..............................................
+[Local Symbol Names]
+  Local symbols help compilers and programmers use names temporarily. There
+are ten local symbol names, which are re-used throughout the program. You may
+refer to them using the names `0' `1' ... `9'. To define a local symbol, write
+a label of the form `<N>:' (where <N> represents any digit). To refer to the
+most recent previous definition of that symbol write `<N>'b, using the same
+digit as when you defined the label. To refer to the next definition of a
+local label, write `<N>'f---where <N> gives you a choice of 10 forward
+references. The `b' stands for ``backwards'' and the `f' stands for
+``forwards''. Local symbols are not emitted by the current Gnu C compiler.
+  There is no restriction on how you can use these labels, but remember that
+at any point in the assembly you can refer to at most 10 prior local labels
+and to at most 10 forward local labels.
+  Local symbol names are only a notation device. They are immediately
+transformed into more conventional symbol names before the assembler uses
+them. The symbol names stored in the symbol table, appearing in error messages
+and optionally emitted to the object file have these parts:
+
+  L : All local labels begin with `L'. Normally both `GAS' and `LD' forget
+symbols that start with `L'. These labels are used for symbols you are never
+intended to see. If you use the `-L' option then `GAS' retains these symbols
+in the object file. If you also instruct `LD' to retain these symbols, you may
+use them in debugging.
+  <digit> : If the label is written `0:' then the digit is `0'. If the label
+is written `1:' then the digit is `1'. And so on up through `9:'.
+  <ctrl-A> : This unusual character is included so you do not accidentally
+invent a symbol of the same name. The character has ASCII value `\001'.
+  ORDINAL NUMBER : This is a serial number to keep the labels distinct. The
+first `0:' gets the number `1'; The 15th `0:' gets the number `15'; ETC..
+Likewise for the other labels `1:' through `9:'. @end table For instance, the
+first `1:' is named `L1<ctrl-A>1', the 44th `3:' is named `L3<ctrl-A>44'.
+
+  --------------------------------------------------------
+[The Special Dot Symbol]
+  The special symbol `.' refers to the current address that `GAS' is
+assembling into. Thus, the expression `melvin: .long .' defines `melvin' to
+contain its own address. Assigning a value to `.' is treated the same as a
+`.org' directive. Thus, the expression `.=.+4' is the same as saying `.space
+4'.
+
+  --------------------------------------------------------
+[Symbol Attributes]
+  Every symbol has, as well as its name, the attributes ``Value'' and
+``Type''. Depending on output format, symbols can also have auxiliary
+attributes. If you use a symbol without defining it, `GAS' assumes zero for
+all these attributes, and probably won't warn you. This makes the symbol an
+externally defined symbol, which is generally what you would want.
+
+  ..............................................
+[Value]
+  The value of a symbol is (usually) 32 bits. For a symbol which labels a
+location in the text, data, bss or absolute sections the value is the number
+of addresses from the start of that section to the label. Naturally for text,
+data and bss sections the value of a symbol changes as `LD' changes section
+base addresses during linking. Absolute symbols' values do not change during
+linking: that is why they are called absolute.
+  The value of an undefined symbol is treated in a special way. If it is 0
+then the symbol is not defined in this assembler source file, and `LD' tries
+to determine its value from other files linked into the same program. You make
+this kind of symbol simply by mentioning a symbol name without defining it. A
+non-zero value represents a `.comm' common declaration. The value is how much
+common storage to reserve, in bytes (addresses). The symbol refers to the
+first address of the allocated storage.
+
+  ..............................................
+[Type]
+  The type attribute of a symbol contains relocation (section) information,
+any flag settings indicating that a symbol is external, and (optionally),
+other information for linkers and debuggers. The exact format depends on the
+object-code output format in use.
+
+  . . . . . . . . . . . . . . . . . . . . . . .
+[Descriptor]
+  This is an arbitrary 16-bit value. You may establish a symbol's descriptor
+value by using a `.desc' statement (see Desc,,`.desc'). A descriptor value
+means nothing to `GAS'.
+
+  . . . . . . . . . . . . . . . . . . . . . . .
+[Other]
+  This is an arbitrary 8-bit value. It means nothing to `GAS'.
+
+  =================================================
+[Expressions]
+  An `expression' specifies an address or numeric value. Whitespace may
+precede and/or follow an expression. The result of an expression must be an
+absolute number, or else an offset into a particular section. If an expression
+is not absolute, and there is not enough information when `GAS' sees the
+expression to know its section, a second pass over the source program might be
+necessary to interpret the expression---but the second pass is currently not
+implemented. `GAS' aborts with an error message in this situation.
+
+  --------------------------------------------------------
+[Empty Expressions]
+  An empty expression has no value: it is just whitespace or null. Wherever an
+absolute expression is required, you may omit the expression, and `GAS'
+assumes a value of (absolute) 0. This is compatible with other assemblers.
+
+  --------------------------------------------------------
+[Integer Expressions]
+  An `integer expression' is one or more ARGUMENTS delimited by OPERATORS.
+
+  ..............................................
+[Arguments]
+  `Arguments' are symbols, numbers or subexpressions. In other contexts
+arguments are sometimes called ``arithmetic operands''. In this manual, to
+avoid confusing them with the ``instruction operands'' of the machine
+language, we use the term ``argument'' to refer to parts of expressions only,
+reserving the word ``operand'' to refer only to machine instruction operands.
+  Symbols are evaluated to yield {<section> <NNN>} where <section> is one of
+text, data, bss, absolute, or undefined. <NNN> is a signed, 2's complement 32
+bit integer. Numbers are usually integers.
+  A number can be a flonum or bignum. In this case, you are warned that only
+the low order 32 bits are used, and `GAS' pretends these 32 bits are an
+integer. You may write integer-manipulating instructions that act on exotic
+constants, compatible with other assemblers.
+  Subexpressions are a left parenthesis `(' followed by an integer expression,
+followed by a right parenthesis `)'; or a prefix operator followed by an
+argument.
+
+  ..............................................
+[Operators]
+  `Operators' are arithmetic functions, like `+' or `%'. Prefix operators are
+followed by an argument. Infix operators appear between their arguments.
+Operators may be preceded and/or followed by whitespace.
+
+  ..............................................
+[Prefix Operator]
+  `GAS' has the following `prefix operators'. They each take one argument,
+which must be absolute.
+ -      `Negation'. Two's complement negation.
+ ~      `Complementation'. Bitwise not.
+
+  ..............................................
+[Infix Operators]
+  `Infix operators' take two arguments, one on either side. Operators have
+precedence, but operations with equal precedence are performed left to right.
+Apart from `+' or `-', both arguments must be absolute, and the result is
+absolute.
+    Highest Precedence
+ *      `Multiplication'.
+ /      `Division'. Truncation is the same as the C operator `/'
+ %      `Remainder'.
+ <      `Shift Left'. Same as the C operator `<<'.
+ <<     `Shift Left'. Same as the C operator `<<'.
+ >      `Shift Right'. Same as the C operator `>>'.
+ >>     `Shift Right'. Same as the C operator `>>'.
+
+    Intermediate precedence
+ |      `Bitwise Inclusive Or'.
+ &      `Bitwise And'.
+ ^      `Bitwise Exclusive Or'.
+ !      `Bitwise Or Not'.
+
+    Lowest Precedence
+ +      `Addition'. If either argument is absolute, the result has the section
+        of the other argument. You may not add together arguments from
+        different sections.
+ -      `Subtraction'. If the right argument is absolute, the result has the
+section of the left argument. If both arguments are in the same section, the
+result is absolute. You may not subtract arguments from different sections.
+  In short, it's only meaningful to add or subtract the OFFSETS in an address;
+you can only have a defined section in one of the two arguments.
+
+  =================================================
+[Assembler Directives]
+  All assembler directives have names that begin with a period (`.'). The rest
+of the name is letters, usually in lower case. This chapter discusses
+directives t

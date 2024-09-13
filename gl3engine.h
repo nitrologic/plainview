@@ -8,6 +8,21 @@
 #include <fstream>
 #include <sstream>
 
+extern "C"{
+	const char *vertexShader;
+	const char *fragmentShader;
+	const char *geometryShader;
+}
+
+#define SHADER(name, path) const char* name = R\" \
+#include path \
+)";
+
+
+//#include "shaders/rayGeometry.glsl"
+
+
+
 typedef std::string S;
 
 typedef GLint i32;
@@ -161,7 +176,9 @@ struct GLProgram {
 	int build() {
 
 		// load program
-		program1 = loadProgram();
+//		program1 = loadProgram();
+		// embed progarm
+		program1 = embedProgram();
 		if (program1 == -1)
 			return 1;
 		glUseProgram(program1);
@@ -281,18 +298,37 @@ struct GLProgram {
 		return a;
 	}
 
+	i32 embedProgram() {
+		i32 shader1 = loadShader(GL_VERTEX_SHADER, vertexShader);
+		check();
+
+		i32 shader2 = loadShader(GL_FRAGMENT_SHADER, fragmentShader);
+		check();
+
+		i32 shader3 = loadShader(GL_GEOMETRY_SHADER, geometryShader);
+		check();
+
+		return buildShaders(shader1, shader2, shader3);
+	}
+
+
 	i32 loadProgram() {
 		std::string vertexGles = loadString("shaders/rayVertex.glsl");
-		i32 shader1 = loadShader(GL_VERTEX_SHADER, vertexGles.data(), vertexGles.length());
+		i32 shader1 = loadShader(GL_VERTEX_SHADER, vertexGles);// .data(), vertexGles.length());
 		check();
 
 		std::string fragmentGles = loadString("shaders/rayFragment.glsl");
-		i32 shader2 = loadShader(GL_FRAGMENT_SHADER, fragmentGles.data(), fragmentGles.length());
+		i32 shader2 = loadShader(GL_FRAGMENT_SHADER, fragmentGles);// .data(), fragmentGles.length());
 		check();
 
 		std::string geometryGles = loadString("shaders/rayGeometry.glsl");
-		i32 shader3 = loadShader(GL_GEOMETRY_SHADER, geometryGles.data(), geometryGles.length());
+		i32 shader3 = loadShader(GL_GEOMETRY_SHADER, geometryGles);// .data(), geometryGles.length());
 		check();
+
+		return buildShaders(shader1, shader2, shader3);
+	}
+
+	i32 buildShaders(i32 shader1,i32 shader2, i32 shader3){
 
 		i32 program1 = glCreateProgram();
 
@@ -325,7 +361,9 @@ struct GLProgram {
 		return program1;
 	}
 
-	i32 loadShader(GLenum shaderType,const char *src, int bytes) {
+	i32 loadShader(GLenum shaderType,std::string s) {
+		const char* src = s.data();
+		int bytes = s.length();
 		u32 shader = glCreateShader(shaderType);
 		const c8* sources[] = { src,0 };
 		i32 lengths[] = {bytes,0};
