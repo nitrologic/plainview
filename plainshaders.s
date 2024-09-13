@@ -1,10 +1,11 @@
 # plainshaders.s
 
-	.global fragmentShader
-	.global vertextShader
-	.global geometryShader
+#	.text
+#	.data
 
-	.text
+	.globl fragmentShader2
+	.globl vertextShader2
+	.globl geometryShader2
 
 fragmentShader: 
 	.long .
@@ -23,3 +24,4 @@ geometryShader:
 geometry1:
 	.incbin "../shaders/rayGeometry.glsl"
 	.byte 0
+
