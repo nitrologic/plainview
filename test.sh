@@ -1,3 +1,5 @@
+set -e
+
 pushd bin
 cmake ..
 make -j8

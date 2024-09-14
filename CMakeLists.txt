@@ -10,21 +10,6 @@ endif()
 
 add_subdirectory(SDL)
 
-if(APPLE)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -std=c++17")
-add_definitions( -D__MACOSX_CORE__ )
-endif(APPLE)
-
-if(WIN32)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -std=c++17")
-add_definitions( -DWIN32 )
-endif(WIN32)
-
-if(UNIX)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -std=c++17")
-# add_definitions( -D__MACOSX_CORE__ )
-endif(UNIX)
-
 # project plainview 
 # (c) Simon Armstrong 2023 
 # all rights reserved
@@ -36,10 +21,34 @@ project(plainview
 	LANGUAGES C CXX ASM
 )
 
+if(APPLE)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -std=c++17")
+add_definitions( -D__MACOSX_CORE__ )
+endif(APPLE)
+
+if(WIN32)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -std=c++17")
+add_definitions( -DWIN32 )
+endif(WIN32)
+
+if(UNIX)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -std=c++17 -fPIE")
+SET(CMAKE_ASM-ATT_FLAGS "${CMAKE_ASM-ATT_FLAGS} -fPIE")
+SET(CMAKE_FLAGS "${CMAKE_FLAGS} -fPIE")
+# add_definitions( -D__MACOSX_CORE__ )
+endif(UNIX)
+
 message("### PROJECT_SOURCE_DIR ${PROJECT_SOURCE_DIR}")
 message("### CMAKE_CXX_COMPILER_ID ${CMAKE_CXX_COMPILER_ID}")
-message("### CMAKE_ASM_COMPILER_ID ${CMAKE_ASM_COMPILER_ID}")
 message("### CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}")
+
+message("### ASM ${ASM}")
+message("### CMAKE_ASM_COMPILER_ID ${CMAKE_ASM_COMPILER_ID}")
+message("### CMAKE_ASM-ATT_FLAGS ${CMAKE_ASM-ATT_FLAGS}")
+
+message("### FLAGS ${FLAGS}")
+
+message("#### ${CMAKE_ASM_COMPILE_OBJECT}")
 
 include_directories(
 	glfw/include
@@ -48,7 +57,7 @@ include_directories(
 )
 
 ADD_EXECUTABLE(plainview
-#	plainshaders.s
+	plainshaders.s
 #   plainbox2d.h
 	platform.h
 	platform.cpp
@@ -76,6 +85,7 @@ endif(APPLE)
 
 if(UNIX)
 target_link_libraries(plainview SDL3-static curl)
+SET_TARGET_PROPERTIES(plainview PROPERTIES POSITION_INDEPENDENT_CODE OFF)
 endif(UNIX)
 
 
