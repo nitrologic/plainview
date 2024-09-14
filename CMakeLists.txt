@@ -1,16 +1,14 @@
 cmake_minimum_required(VERSION 3.5)
 
+# SET(CMAKE_MESSAGE_CONTEXT_SHOW)
+
 option(BUILD_SHARED_LIBS "" OFF)
 
-#option(BOX2D_BUILD_UNIT_TESTS "" OFF)
-#option(BOX2D_BUILD_TESTBED "" OFF)
+if(UNIX)
+option(SDL_KMSDRM ON)
+endif()
 
 add_subdirectory(SDL)
-#add_subdirectory(box2d)
-
-
-message("### PROJECT_SOURCE_DIR ${PROJECT_SOURCE_DIR}")
-message("### CMAKE_CXX_COMPILER_ID ${CMAKE_CXX_COMPILER_ID}")
 
 if(APPLE)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -std=c++17")
@@ -37,6 +35,11 @@ project(plainview
 	HOMEPAGE_URL "https://github.com/nitrologic/plainview"
 	LANGUAGES C CXX ASM
 )
+
+message("### PROJECT_SOURCE_DIR ${PROJECT_SOURCE_DIR}")
+message("### CMAKE_CXX_COMPILER_ID ${CMAKE_CXX_COMPILER_ID}")
+message("### CMAKE_ASM_COMPILER_ID ${CMAKE_ASM_COMPILER_ID}")
+message("### CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}")
 
 include_directories(
 	glfw/include

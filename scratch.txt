@@ -1,3 +1,8 @@
+#option(BOX2D_BUILD_UNIT_TESTS "" OFF)
+#option(BOX2D_BUILD_TESTBED "" OFF)
+#add_subdirectory(box2d)
+
+
 #define SHADER(name, path) const char* name = R\"( \
 #include path \
 )";
