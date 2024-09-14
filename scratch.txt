@@ -1,0 +1,3 @@
+#define SHADER(name, path) const char* name = R\"( \
+#include path \
+)";

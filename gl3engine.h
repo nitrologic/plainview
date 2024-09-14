@@ -8,20 +8,66 @@
 #include <fstream>
 #include <sstream>
 
+#ifdef asmshaders
 extern "C"{
 	const char *vertexShader;
 	const char *fragmentShader;
 	const char *geometryShader;
 }
+#endif
 
-#define SHADER(name, path) const char* name = R\" \
-#include path \
+const char *vertexShader=R"(
+#version 330
+
+uniform mat4 view;
+
+in vec3 xyz;
+
+flat out int vert_bits;
+
+void main(){
+	vec4 v = vec4( xyz.x, xyz.y, xyz.z, 1.0 );
+	vec4 vv = v * view;
+	vec4 i = vec4( vv.x, vv.y, 0.0, 1.0 );
+	vert_bits = 0;//int( bits );
+	gl_Position = i;
+}
 )";
+const char *fragmentShader=R"(
+#version 330
 
+uniform vec4 palette[32];
 
-//#include "shaders/rayGeometry.glsl"
+flat in int frag_bits;
 
+out vec4 rgba;
 
+void main(){
+	rgba = palette[frag_bits & 31];
+}
+)";
+const char *geometryShader=R"(
+#version 330
+
+flat in int vert_bits[];
+flat out int frag_bits;
+
+layout (triangles) in;
+
+layout (triangle_strip, max_vertices = 3) out;
+
+void main() 
+{    
+	for (int v = 0 ; v < 3; v++){
+		gl_Position = gl_in[v].gl_Position + vec4( 0.1, -0.1, 0.0, 0.0 ); 
+		frag_bits = vert_bits[v];
+		EmitVertex();
+	}
+
+	
+	EndPrimitive();
+} 
+)";
 
 typedef std::string S;
 

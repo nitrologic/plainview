@@ -45,7 +45,7 @@ include_directories(
 )
 
 ADD_EXECUTABLE(plainview
-	plainshaders.s
+#	plainshaders.s
 #   plainbox2d.h
 	platform.h
 	platform.cpp
