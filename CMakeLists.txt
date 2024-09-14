@@ -10,13 +10,9 @@ endif()
 
 add_subdirectory(SDL)
 
-# project plainview 
-# (c) Simon Armstrong 2023 
-# all rights reserved
-
 project(plainview
 	VERSION 0.0.0
-	DESCRIPTION "plainview SDL2 development harness"
+	DESCRIPTION "plainview SDL2 development harness (c) 2024 Simon Armstrong All rights reserved"
 	HOMEPAGE_URL "https://github.com/nitrologic/plainview"
 	LANGUAGES C CXX ASM
 )
@@ -33,32 +29,14 @@ endif(WIN32)
 
 if(UNIX)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -std=c++17 -fPIE")
-SET(CMAKE_ASM-ATT_FLAGS "${CMAKE_ASM-ATT_FLAGS} -fPIE")
-SET(CMAKE_FLAGS "${CMAKE_FLAGS} -fPIE")
-# add_definitions( -D__MACOSX_CORE__ )
 endif(UNIX)
-
-message("### PROJECT_SOURCE_DIR ${PROJECT_SOURCE_DIR}")
-message("### CMAKE_CXX_COMPILER_ID ${CMAKE_CXX_COMPILER_ID}")
-message("### CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}")
-
-message("### ASM ${ASM}")
-message("### CMAKE_ASM_COMPILER_ID ${CMAKE_ASM_COMPILER_ID}")
-message("### CMAKE_ASM-ATT_FLAGS ${CMAKE_ASM-ATT_FLAGS}")
-
-message("### FLAGS ${FLAGS}")
-
-message("#### ${CMAKE_ASM_COMPILE_OBJECT}")
 
 include_directories(
 	glfw/include
 	SDL/include
-#   box2d/include
 )
 
 ADD_EXECUTABLE(plainview
-	plainshaders.s
-#   plainbox2d.h
 	platform.h
 	platform.cpp
 	glad/gl.h
@@ -73,6 +51,7 @@ ADD_EXECUTABLE(plainview
 # documentation
 	notes.txt
 	README.md
+#	plainshaders.s
 )
 
 if(WIN32)

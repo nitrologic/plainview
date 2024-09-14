@@ -1,5 +1,6 @@
-# plainshaders.s
+# todo: investigate CMAKE_ASM for building glsl
 
+# plainshaders.s
 #	.text
 #	.data
 
