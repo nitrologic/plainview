@@ -1,3 +1,95 @@
+#add_definitions( -DSDL_PLATFORM_WIN32 )
+#   add_definitions( -D_WIN32_WINNT=0x0501 )
+#   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:fast /EHsc")
+#   SET(MSVC_RUNTIME "static")
+#   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MT /fp:fast /EHsc")
+#   add_definitions( -DUNICODE )
+#   add_definitions( -D_UNICODE )
+#	SDL/include
+#	SDL/include/build_config
+
+#SDL_PLATFORM_WIN32
+
+
+#if defined(SDL_PLATFORM_AIX)
+    return "AIX";
+#elif defined(SDL_PLATFORM_ANDROID)
+    return "Android";
+#elif defined(SDL_PLATFORM_BSDI)
+    return "BSDI";
+#elif defined(SDL_PLATFORM_EMSCRIPTEN)
+    return "Emscripten";
+#elif defined(SDL_PLATFORM_FREEBSD)
+    return "FreeBSD";
+#elif defined(SDL_PLATFORM_HAIKU)
+    return "Haiku";
+#elif defined(SDL_PLATFORM_HPUX)
+    return "HP-UX";
+#elif defined(SDL_PLATFORM_IRIX)
+    return "Irix";
+#elif defined(SDL_PLATFORM_LINUX)
+    return "Linux";
+#elif defined(__MINT__)
+    return "Atari MiNT";
+#elif defined(SDL_PLATFORM_MACOS)
+    return "macOS";
+#elif defined(SDL_PLATFORM_NETBSD)
+    return "NetBSD";
+#elif defined(SDL_PLATFORM_OPENBSD)
+    return "OpenBSD";
+#elif defined(SDL_PLATFORM_OS2)
+    return "OS/2";
+#elif defined(SDL_PLATFORM_OSF)
+    return "OSF/1";
+#elif defined(SDL_PLATFORM_QNXNTO)
+    return "QNX Neutrino";
+#elif defined(SDL_PLATFORM_RISCOS)
+    return "RISC OS";
+#elif defined(SDL_PLATFORM_SOLARIS)
+    return "Solaris";
+#elif defined(SDL_PLATFORM_WIN32)
+    return "Windows";
+#elif defined(SDL_PLATFORM_WINGDK)
+    return "WinGDK";
+#elif defined(SDL_PLATFORM_XBOXONE)
+    return "Xbox One";
+#elif defined(SDL_PLATFORM_XBOXSERIES)
+    return "Xbox Series X|S";
+#elif defined(SDL_PLATFORM_IOS)
+    return "iOS";
+#elif defined(SDL_PLATFORM_TVOS)
+    return "tvOS";
+#elif defined(SDL_PLATFORM_PS2)
+    return "PlayStation 2";
+#elif defined(SDL_PLATFORM_PSP)
+    return "PlayStation Portable";
+#elif defined(SDL_PLATFORM_VITA)
+    return "PlayStation Vita";
+#elif defined(SDL_PLATFORM_NGAGE)
+    return "Nokia N-Gage";
+#elif defined(SDL_PLATFORM_3DS)
+    return "Nintendo 3DS";
+#elif defined(__managarm__)
+
+
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+
+SDL_GetPlatform
+
+SDL_PLATFORM_LINUX
+
+SDL_PLATFORM_WIN32
+SDL_PLATFORM_MACOS
+SDL_PLATFORM_EMSCRIPTEN
+SDL_PLATFORM_IOS
+SDL_PLATFORM_ANDROID
+
+#SDL_PLATFORM_WINGDK
+#SDL_PLATFORM_NGAGE
+#SDL_PLATFORM_XBOXONE
+#SDL_PLATFORM_XBOXSERIES
+
 //in float bits;
 
 

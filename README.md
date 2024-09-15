@@ -8,6 +8,12 @@ A plain view of the modern monitor video display landscape
 	* display device management courtesy SDL3 
 	* OpenGL bindings courtesy Glad Loader-Generator 
 
+## todo
+
+	* vector font
+	* command line interpreter
+	* 
+
 ## Latest
 
 	* github workflow added for macos ubuntu windows
@@ -16,11 +22,6 @@ A plain view of the modern monitor video display landscape
 	* support for GLFW 3 removed
 	* big ups to SDL3 for managing OpenGL 3.2 GLSL 3.30 so well
 
-## Coming Soon
-
-	* some box2d experiments 
-	* vector font
-	* remote host 1
 
 ## References
 

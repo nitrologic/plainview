@@ -1,14 +1,18 @@
 cmake_minimum_required(VERSION 3.5)
 
-# SET(CMAKE_MESSAGE_CONTEXT_SHOW)
+if(WIN32)
+add_definitions( -DWIN32 )
+endif()
 
 option(BUILD_SHARED_LIBS "" OFF)
+
+add_subdirectory(SDL)
+
+# SET(CMAKE_MESSAGE_CONTEXT_SHOW)
 
 if(UNIX)
 option(SDL_KMSDRM ON)
 endif()
-
-add_subdirectory(SDL)
 
 project(plainview
 	VERSION 0.0.0
@@ -33,7 +37,6 @@ endif(UNIX)
 
 include_directories(
 	glfw/include
-	SDL/include
 )
 
 ADD_EXECUTABLE(plainview
