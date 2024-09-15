@@ -2,5 +2,6 @@
     "files.associations": {
         "xlocmes": "cpp"
     },
-    "dotnet.defaultSolution": "disable"
+    "dotnet.defaultSolution": "disable",
+    "cmake.configureOnOpen": false
 }

@@ -3,5 +3,4 @@ bin
 bin2
 msvc19
 .DS_Store
-sandbox
-nitro
+.vscode
