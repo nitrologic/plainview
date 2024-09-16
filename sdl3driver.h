@@ -21,6 +21,7 @@ struct SDLDriver : Driver {
             return;
         }
         std::cout << "SDL " << (int)SDL_MAJOR_VERSION  << "." << (int)SDL_MINOR_VERSION << "." << (int)SDL_MICRO_VERSION << std::endl;
+        std::cout << "SDL_Platform " << SDL_GetPlatform() << std::endl;
 		std::cout << SDL_GetPlatform() << std::endl;
         
 #ifdef USE_OPENGL_3_2

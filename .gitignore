@@ -2,5 +2,6 @@ build
 bin
 bin2
 msvc19
+xcode15
 .DS_Store
 .vscode
