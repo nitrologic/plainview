@@ -159,7 +159,9 @@ struct SDLDriver : Driver {
 			std::cout << "fps:" << fps << std::endl;
 		}
 	}
-
+	int config() {
+		return 0;
+	}
 	int test() {
 		Uint32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;    // | SDL_WINDOW_HIGH_PIXEL_DENSITY;
 /*

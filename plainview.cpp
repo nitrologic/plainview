@@ -21,7 +21,8 @@ static bool terminateApp = false;
 #include "platform.h"
 
 #ifndef __unixsucks__
-#define RUN_TEST
+//#define RUN_TEST
+#define RUN_PROMPT
 #endif
 
 Monitors allMonitors;
@@ -61,6 +62,9 @@ Driver* sdlOpen() {
 	return driver;
 }
 
+void dumpHelp(){
+	std::cout << std::endl;
+}
 void dumpModes() {
 	for (Monitor *m : allMonitors) {
 		std::cout << m->driver << " " << m->name << " ";
@@ -148,6 +152,46 @@ int main() {
 //	testServe();
 //	testPing();
 //	testLoopback();
+
+#ifdef RUN_PROMPT
+
+	Driver* sdlDriver = sdlOpen();
+
+	if (sdlDriver == nullptr) {
+		std::cout << "sdlDriver failure" << std::endl;
+		return 1;
+	}
+
+	Engine* engine = new GL3Engine();
+	sdlDriver->setEngine(engine);
+
+	while (true)
+	{
+		std::cout << "]" << std::flush;
+
+		S line;
+
+		std::getline(std::cin, line);
+
+		if (line == "help") {
+			dumpHelp();
+		}
+		if (line == "modes") {
+			dumpModes();
+//			sdlDriver->config();
+		}
+		if (line == "test") {
+			sdlDriver->test();
+		}
+		if (line == "exit") {
+			break;
+		}
+	}
+
+	sdlDriver->quit();
+
+#endif
+
 
 #ifdef RUN_TEST
 
