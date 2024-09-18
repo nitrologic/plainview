@@ -1,6 +1,7 @@
 {
     "files.associations": {
-        "xlocmes": "cpp"
+        "xlocmes": "cpp",
+        "iosfwd": "cpp"
     },
     "dotnet.defaultSolution": "disable",
     "cmake.configureOnOpen": false

@@ -14,6 +14,7 @@ const char *plainviewVersion = "0.4";
 
 static bool terminateApp = false;
 
+#include "json.h"
 #include "plainview.h"
 #include "sdl3driver.h"
 #include "gl3engine.h"
@@ -79,6 +80,25 @@ void dumpModes() {
 	}
 	std::cout << std::endl;
 }
+
+
+void jsonifyMonitors() {
+
+	
+	for (Monitor *m : allMonitors) {
+		std::cout << m->driver << " " << m->name << " ";
+		std::cout << m->rect.x << "," << m->rect.y << "," << m->rect.w << "," << m->rect.h;
+		std::cout << std::endl;
+		for (const DensityFrequency &mode : m->modeTypes) {
+			std::cout << "\t" << mode.first << "x " << mode.second << " Hz" << std::endl;
+			for (const VideoMode &videoMode : m->modeList[mode]) {
+				std::cout << "\t\t" << videoMode.mWidth << " x " << videoMode.mHeight << std::endl;
+			}
+		}
+	}
+	std::cout << std::endl;
+}
+
 
 Socket *s;
 
