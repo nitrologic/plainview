@@ -161,7 +161,7 @@ int testPing(){
 
 //#include <box2d/box2d.h>
 
-int main() {
+int main(int argc, char* argv[]) {
 
 	uint64_t t = cpuTime();
 
@@ -173,6 +173,9 @@ int main() {
 
 	std::cout << "elapsed micros " << t << std::endl;
 
+	if(argc>1 && strcmp(argv[1],"--test")==0){
+		return 0;
+	}
 
 //	Box2DSim *sim = new Box2DSim();
 
