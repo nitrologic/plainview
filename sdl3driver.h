@@ -163,7 +163,10 @@ struct SDLDriver : Driver {
 		return 0;
 	}
 	int test() {
-		Uint32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;    // | SDL_WINDOW_HIGH_PIXEL_DENSITY;
+		Uint32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN;
+		int frame = addWindow(1280, 720, 60, flags);
+
+//		Uint32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;    // | SDL_WINDOW_HIGH_PIXEL_DENSITY;
 /*
 #ifdef NDEBUG
 		Uint32 flags = SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL;	// | SDL_WINDOW_HIGH_PIXEL_DENSITY;
@@ -172,7 +175,7 @@ struct SDLDriver : Driver {
 #endif
 */
 //		int frame = addWindow(1280, 960, 75, flags);
-		int frame = addWindow(1280, 800, 75, flags);
+//		int frame = addWindow(1280, 800, 75, flags);
 //		int frame = addWindow(3024, 1964, 120, flags);
 		if (frame < 0) {
 			std::cout << "addWindow failure" << std::endl;
