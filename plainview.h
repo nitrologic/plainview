@@ -57,6 +57,7 @@ struct Monitor {
 	S name;
 	Zoom zoom;
 	R rect;
+	// per densityfrequency
 	ModeTypes modeTypes;
 	Modes modeList;
 

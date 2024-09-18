@@ -81,22 +81,33 @@ void dumpModes() {
 	std::cout << std::endl;
 }
 
+// for each monitor { name shape driver modes }
 
-void jsonifyMonitors() {
-
-	
+utf8 jsonifyMonitors() {
+	std::stringstream ss;	
+	bool inmon=false;
+	ss<<"[";
 	for (Monitor *m : allMonitors) {
-		std::cout << m->driver << " " << m->name << " ";
-		std::cout << m->rect.x << "," << m->rect.y << "," << m->rect.w << "," << m->rect.h;
-		std::cout << std::endl;
+		if (inmon) ss << ",";
+		else inmon=true;
+		ss << "{\"name\":"<< quoted(m->name) << ",";
+		ss << "\"shape\":[";
+		ss << m->rect.x << "," << m->rect.y << "," << m->rect.w << "," << m->rect.h;
+		ss << "],";
+		ss << "\"driver\":" << quoted(m->driver) << ",";
+		ss << "\"modes\":[";
+		bool inarray=false;
 		for (const DensityFrequency &mode : m->modeTypes) {
-			std::cout << "\t" << mode.first << "x " << mode.second << " Hz" << std::endl;
 			for (const VideoMode &videoMode : m->modeList[mode]) {
-				std::cout << "\t\t" << videoMode.mWidth << " x " << videoMode.mHeight << std::endl;
+				if (inarray) ss << ",";
+				else inarray=true;
+				ss << "[" << videoMode.mWidth << "," << videoMode.mHeight << "," << mode.first << "," << mode.second << "]";
 			}
 		}
+		ss << "]}" << std::endl;
 	}
-	std::cout << std::endl;
+	ss<<"]";
+	return ss.str();
 }
 
 
@@ -197,7 +208,9 @@ int main() {
 			dumpHelp();
 		}
 		if (line == "modes") {
-			dumpModes();
+			S modes = jsonifyMonitors();
+			std::cout << modes << std::endl;
+//			dumpModes();
 //			sdlDriver->config();
 		}
 		if (line == "test") {
