@@ -16,7 +16,7 @@ endif()
 
 project(plainview
 	VERSION 0.0.0
-	DESCRIPTION "plainview SDL2 development harness (c) 2024 Simon Armstrong All rights reserved"
+	DESCRIPTION "plainview SDL2 remote (c) 2024 Simon Armstrong All rights reserved"
 	HOMEPAGE_URL "https://github.com/nitrologic/plainview"
 	LANGUAGES C CXX ASM
 )
@@ -34,6 +34,13 @@ endif(WIN32)
 if(UNIX)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -std=c++17 -fPIE")
 endif(UNIX)
+
+message("### PROJECT_SOURCE_DIR ${PROJECT_SOURCE_DIR}")
+message("### CMAKE_CXX_COMPILER_ID ${CMAKE_CXX_COMPILER_ID}")
+message("### CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}")
+
+message("### CMAKE_ASM_COMPILER_ID ${CMAKE_ASM_COMPILER_ID}")
+message("### CMAKE_ASM_FLAGS ${CMAKE_ASM_FLAGS}")
 
 include_directories(
 	glfw/include
