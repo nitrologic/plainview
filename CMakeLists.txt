@@ -8,19 +8,6 @@ option(BUILD_SHARED_LIBS "" OFF)
 
 add_subdirectory(SDL)
 
-# SET(CMAKE_MESSAGE_CONTEXT_SHOW)
-
-if(UNIX)
-option(SDL_KMSDRM ON)
-endif()
-
-project(plainview
-	VERSION 0.0.0
-	DESCRIPTION "plainview SDL2 remote (c) 2024 Simon Armstrong All rights reserved"
-	HOMEPAGE_URL "https://github.com/nitrologic/plainview"
-	LANGUAGES C CXX ASM
-)
-
 if(APPLE)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -std=c++17")
 add_definitions( -D__MACOSX_CORE__ )
@@ -32,15 +19,24 @@ add_definitions( -DWIN32 )
 endif(WIN32)
 
 if(UNIX)
+
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -std=c++17 -fPIE")
+
+project(drmview
+	LANGUAGES C CXX ASM
+)
+ADD_EXECUTABLE(drmview
+	drmview.cpp
+)
+
 endif(UNIX)
 
-message("### PROJECT_SOURCE_DIR ${PROJECT_SOURCE_DIR}")
-message("### CMAKE_CXX_COMPILER_ID ${CMAKE_CXX_COMPILER_ID}")
-message("### CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}")
-
-message("### CMAKE_ASM_COMPILER_ID ${CMAKE_ASM_COMPILER_ID}")
-message("### CMAKE_ASM_FLAGS ${CMAKE_ASM_FLAGS}")
+project(plainview
+	VERSION 0.0.0
+	DESCRIPTION "plainview SDL2 remote (c) 2024 Simon Armstrong All rights reserved"
+	HOMEPAGE_URL "https://github.com/nitrologic/plainview"
+	LANGUAGES C CXX ASM
+)
 
 include_directories(
 	glfw/include
@@ -81,3 +77,9 @@ endif(UNIX)
 include(CTest)
 
 add_test(NAME plainview COMMAND plainview --test)
+
+
+if(UNIX)
+target_link_libraries(plainview SDL3-static curl)
+SET_TARGET_PROPERTIES(plainview PROPERTIES POSITION_INDEPENDENT_CODE OFF)
+endif(UNIX)
