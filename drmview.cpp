@@ -7,9 +7,9 @@
 //#include "host.h"
 #include "sysinfo.h"
 #include "cec.h"
-#include "video.h"
+//#include "video.h"
 
-// std::string StaticPath="..";
+std::string ShadersPath="../shaders";
 
 int flipTest(DRMDisplay &display);
 int displayTest();
@@ -140,7 +140,7 @@ int flipTest(DRMDisplay &display){
 	int testCount=120;
 	if(testCount){
 
-		int init=graphics.init(StaticPath);
+		int init=graphics.initEGL(ShadersPath);
 		if(init){
 			return TestDisplaysInit+init;
 		}

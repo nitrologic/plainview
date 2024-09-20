@@ -6,6 +6,10 @@
 
 #include <vector>
 
+#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
+
 #include <gbm.h>
 #include <xf86drm.h>
 #include <xf86drmMode.h>
@@ -13,6 +17,24 @@
 #include <EGL/eglext.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
+
+#include <signal.h>
+
+#define RPCError(num) {if(num){std::cout << "num" << std::endl;return num;}}
+#define ErrorResult(num,msg) {if(num){result=msg;std::cout << msg << std::endl;return num;}}
+#define ErrorWarn(num,msg) {if(num){std::cout << msg << std::endl;return num;}}
+#define ErrorCheck(num,msg) {if(num){std::cout << msg << std::endl;raise(SIGSTOP);return num;}}
+#define NullCheck(p,num,msg) {if(p==null){std::cout << msg << std::endl;raise(SIGSTOP);return num;}}
+
+#define Stringify(x) #x
+
+// TODO: FDErrorCheck => FDSignalCheck
+
+#define FDErrorCheck(fd,num,msg) {if(fd<0){std::cout << msg << " errno:" << errno << ":" << strerror(errno) << std::endl;raise(SIGSTOP);return num;}}
+#define FDWarnCheck(fd,num,msg) {if(fd<0){std::cout << msg << " errno:" << errno << ":" << strerror(errno) << std::endl;return num;}}
+
+
+
 
 static std::string FourCC(int id){
 	uint8_t bytes[4];
