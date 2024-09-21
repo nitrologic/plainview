@@ -59,6 +59,7 @@ project(plainview
 )
 
 include_directories(
+	/usr/include/drm
 	glfw/include
 )
 
