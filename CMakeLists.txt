@@ -4,6 +4,10 @@ if(WIN32)
 add_definitions( -DWIN32 )
 endif()
 
+if(LINUX)
+add_definitions( -D--enable-video-kmsdrm )
+endif()
+
 option(BUILD_SHARED_LIBS "" OFF)
 
 add_subdirectory(SDL)
