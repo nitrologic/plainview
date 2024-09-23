@@ -52,6 +52,7 @@ jobs:
         sudo apt-get -y install libegl-dev
         sudo apt-get -y install libgles2-mesa-dev 
         sudo apt-get -y install libasound2-dev
+        sudo apt-get -y install libudev-dev
       
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
