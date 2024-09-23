@@ -6,7 +6,7 @@
 
 #define AudioFrequency 48000
 
-#ifdef ALSA_AUDIO
+#ifdef USE_ALSA_AUDIO
 #include <alsa/asoundlib.h>
 #endif
 
@@ -190,7 +190,7 @@ struct SynthStream:AudioBuffer{
 		voice->playNote(note);
 		voices.insert(voice);
 	}
-#ifdef ALSA_AUDIO
+#ifdef USE_ALSA_AUDIO
 	int mixDown(snd_pcm_t *pcm){
 		int count=frames*channels;
 		memset(mixBuffer,0,count*4);

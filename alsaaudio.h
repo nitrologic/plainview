@@ -12,10 +12,13 @@
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 
+#ifndef USE_ALSA_AUDIO
+#error "USE_ALSA_AUDIO not defined"
+#endif
+
 #include <alsa/asoundlib.h>
 
 #define SHOW_CTL_INFO
-
 
 std::string safeString(const char *s){
 	return(s==NULL)?std::string(""):std::string(s);
@@ -409,8 +412,7 @@ struct ALSAAudio{
 		snd_pcm_uframes_t frames;
 		snd_pcm_hw_params_get_period_size(params,&frames,NULL);
 		std::cout << "period size:"<<frames<<std::endl;
-#define HAS_MIXDOWN
-#ifdef HAS_MIXDOWN
+#ifdef HAS_ALSA_AUDIO
 		SynthStream source(frames,2);
 		for(int i=0;i<350;i++){
 			source.mixDown(handle);

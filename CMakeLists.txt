@@ -41,7 +41,7 @@ project(drmview
 	LANGUAGES C CXX ASM
 )
 
-add_definitions( -DALSA_AUDIO )
+add_definitions( -DUSE_ALSA_AUDIO )
 
 ADD_EXECUTABLE(drmview
 	drmview.cpp
