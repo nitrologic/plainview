@@ -145,13 +145,15 @@ int flipTest(DRMDisplay &display){
 			return TestDisplaysInit+init;
 		}
 
+		int flipfail = 0;
+
 		std::cout << "Graphics Initialised:"<< display.width << "x" <<display.height << std::endl;
 		for(int i=0;i<testCount;i++){
 			graphics.clear(0.15f, 0.15f, (float)i/testCount, 1.0f);
-			int flipfail=display.flip();
+			flipfail=display.flip();
 			if(flipfail){
 				std::cout << "flip error:" << flipfail << std::endl;
-				break;
+				return flipfail;
 			}
 			std::cout << ".";
 //			sleep(1);
