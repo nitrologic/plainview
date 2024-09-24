@@ -6,4 +6,5 @@ cmake ..
 make -j8
 popd
 
-bin/plainview
+#bin/plainview
+bin/drmview
