@@ -93,8 +93,9 @@ private:
 
 int main() {
     LwoLoader loader;
-	const char* path = "C:\\Program Files\\LightWaveDigital\\LightWave_2024.1.0\\support\\genoma\\shapes\\Skelegon.lwo";
-    loader.load(path);
+	//const char* path = "C:\\Program Files\\LightWaveDigital\\LightWave_2024.1.0\\support\\genoma\\shapes\\Skelegon.lwo";
+	const char* path = "../geom/Ant_Rig.lwo";
+	loader.load(path);
     return 0;
 }
 
