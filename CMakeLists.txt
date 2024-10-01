@@ -50,3 +50,11 @@ ADD_EXECUTABLE(drmview
 target_link_libraries(drmview m GLESv2 EGL asound cec pthread rt udev drm gbm dl -static-libstdc++)
 
 endif(UNIX)
+
+project(lwoview
+	LANGUAGES C CXX ASM
+)
+
+ADD_EXECUTABLE(lwoview
+	parselwo2.cpp
+)
