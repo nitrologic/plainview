@@ -15,6 +15,50 @@ struct Point {
     float x, y, z;
 };
 
+// Structure to store a polygon
+struct Polygon {
+    std::vector<uint16_t> vertexIndices;
+};
+
+// Structure to store a patch
+struct Patch {
+	std::vector<uint16_t> controlPointIndices;
+};
+
+struct Bone {
+	std::string name;
+	uint16_t parentIndex;
+	float position[3];
+	float orientation[3];
+	float length;
+};
+struct swapReader {
+	std::ifstream& file;
+	swapReader(std::ifstream& f) : file(f) {};
+	uint16_t read16() {
+		uint16_t value16;
+		char* p = (char*)&value16;
+		file.read(p + 1, 1);
+		file.read(p + 0, 1);
+		return value16;
+	}
+	uint32_t read32() {
+		uint32_t value32;
+		char* p = (char*)&value32;
+		file.read(p + 3, 1);
+		file.read(p + 2, 1);
+		file.read(p + 1, 1);
+		file.read(p + 0, 1);
+		return value32;
+	}
+
+	uint32_t read32f() {
+		uint32_t value = read32();
+		float f32 = *(float*)&value;
+		return f32;
+	}
+};
+
 // Simple loader for LWO2 format
 class LwoLoader {
 public:
@@ -24,12 +68,11 @@ public:
             std::cerr << "Error opening file: " << filePath << std::endl;
             return false;
         }
+		swapReader infile(file);
 
         char chunkID[4];
         while (file.read(chunkID, 4)) {
-            uint32_t chunkSize = 0;
-            file.read(reinterpret_cast<char*>(&chunkSize), 4);
-            chunkSize = swapEndian(chunkSize);  // Convert big endian to host byte order
+            uint32_t chunkSize = infile.read32();
 
             if (std::memcmp(chunkID, "FORM", 4) == 0) {
                 char formType[4];
@@ -39,9 +82,9 @@ public:
                     return false;
                 }
             } else if (std::memcmp(chunkID, "PNTS", 4) == 0) {
-                readPoints(file, chunkSize);
+                readPoints(infile, chunkSize);
             } else if (std::memcmp(chunkID, "POLS", 4) == 0) {
-                readPolygons(file, chunkSize);
+                readPolygons(infile, chunkSize);
 			}
 			else if (std::memcmp(chunkID, "PTAG", 4) == 0) {
 				readPtags(file, chunkSize);
@@ -55,36 +98,138 @@ public:
     }
 
 private:
-    std::vector<Point> points;
-    
-    // Helper to swap endianess for big endian values
-    uint32_t swapEndian(uint32_t val) {
-        return (val >> 24) |
-               ((val << 8) & 0x00FF0000) |
-               ((val >> 8) & 0x0000FF00) |
-               (val << 24);
+
+    std::vector<Polygon> polygons;
+
+    void readPolygons(swapReader &in, uint32_t chunkSize) {
+
+		char polID[4];
+		in.file.read(polID, 4);
+		std::cout << "Polygon ID: " << polID[0] << polID[1] << polID[2] << polID[3] << std::endl;
+
+		if(std::memcmp(polID, "PTCH", 4) == 0){
+			std::cerr << "PTCH POLS chunk" << std::endl;
+			readPatches(in, chunkSize - 4);  // Subtract 4 bytes for the polID
+			return;
+		}
+		else if (std::memcmp(polID, "FACE", 4) == 0) {
+			std::cerr << "FACE POLS chunk" << std::endl;
+			return;
+		}else if (std::memcmp(polID, "BONE", 4) == 0) {
+			std::cerr << "BONE POLS chunk" << std::endl;
+			readBones(in, chunkSize - 4);  // Subtract 4 bytes for the polID
+			return;
+		}else{
+			std::cerr << "Not a valid POLS chunk" << std::endl;
+			return;
+		}
+        polygons.clear();
+		uint32_t bytes = chunkSize;
+		while (bytes > 0) {
+			uint16_t vertexCount = in.read16();
+			bytes -= 2;
+			Polygon p;
+			p.vertexIndices.resize(vertexCount);
+			for (uint16_t j = 0; j < vertexCount; ++j) {
+				uint16_t i16 = in.read16();
+				p.vertexIndices[j] = i16;
+				bytes -= 2;
+			}
+			polygons.push_back(p);
+		}
+        std::cout << "Loaded " << polygons.size() << " polygons." << std::endl;
     }
 
-    void readPoints(std::ifstream& file, uint32_t chunkSize) {
+	std::vector<Bone> bones;
+
+	void readBones(swapReader& in, uint32_t chunkSize) {
+//		char boneID[4];
+//		in.file.read(boneID, 4);
+//		std::cout << "Bone ID: " << boneID[0] << boneID[1] << boneID[2] << boneID[3] << std::endl;
+
+		uint32_t bytes = chunkSize;
+		std::vector<char> name;
+		while (bytes > 0) {
+			if(in.file.eof())
+				break;
+			Bone bone;
+			uint16_t nameLength = in.read16();
+			bytes -= 2;
+			int count= nameLength;
+			if(count&1)
+				count++;
+			name.resize(count);
+			in.file.read(name.data(), count);
+			bytes -= count;
+
+			bone.name = std::string(name.data(), nameLength - 1);
+			bone.parentIndex = in.read16();
+			bytes -= 2;
+
+			for (int i = 0; i < 3; ++i) {
+				bone.position[i] = in.read32f();
+				bytes -= 4;
+			}
+
+			for (int i = 0; i < 3; ++i) {
+				bone.orientation[i] = in.read32f();
+				bytes -= 4;
+			}
+
+			bone.length = in.read32f();
+			bytes -= 4;
+
+			bones.push_back(bone);
+		}
+		std::cout << "Loaded " << bones.size() << " bones." << std::endl;
+	}
+
+	void readPatches(swapReader& in, uint32_t chunkSize) {
+		std::vector<Patch> patches;
+		uint32_t bytes = chunkSize;
+		while (bytes > 0) {
+			uint16_t controlPointCount = in.read16();
+			bytes -= 2;
+			Patch p;
+			p.controlPointIndices.resize(controlPointCount);
+			for (uint16_t j = 0; j < controlPointCount; ++j) {
+				uint16_t i16 = in.read16();
+				p.controlPointIndices[j] = i16;
+				bytes -= 2;
+			}
+			patches.push_back(p);
+		}
+		std::cout << "Loaded " << patches.size() << " patches." << std::endl;
+	}
+    
+	std::vector<Point> points;
+    
+    void readPoints(swapReader &in, uint32_t chunkSize) {
         int numPoints = chunkSize / 12;  // Each point is 3 floats (12 bytes)
         points.resize(numPoints);
-        for (int i = 0; i < numPoints; ++i) {
-            file.read(reinterpret_cast<char*>(&points[i]), sizeof(Point));
-            points[i].x = swapEndian(points[i].x);  // Swap endianness for each float
-            points[i].y = swapEndian(points[i].y);
-            points[i].z = swapEndian(points[i].z);
+		size_t ints= numPoints * sizeof(Point);
+		std::vector<uint32_t> i3(3);
+		char* p = reinterpret_cast<char*>(i3.data());
+		for (size_t i = 0; i < numPoints; ++i) {
+			float x = in.read32f();
+			float y = in.read32f();
+			float z = in.read32f();
+			points[i] = { x, y, z };
+        }
+        for(auto &p:points){
+//            std::cout << "Point: " << p.x << ", " << p.y << ", " << p.z << std::endl;
         }
         std::cout << "Loaded " << numPoints << " points." << std::endl;
     }
 
-    void readPolygons(std::ifstream& file, uint32_t chunkSize) {
+    void _readPolygons(std::ifstream& file, uint32_t chunkSize) {
         // In this simple example, we skip polygon data but you'd parse it similarly.
         std::cout << "Skipping " << chunkSize << " bytes of polygon data." << std::endl;
         file.seekg(chunkSize, std::ios::cur);  // Skip for now
     }
 
 	void readPtags(std::ifstream& file, uint32_t chunkSize) {
-		// In this simple example, we skip polygon data but you'd parse it similarly.
+		// ptag chunk has polygon attributes
 		std::cout << "Skipping " << chunkSize << " bytes of ptag data." << std::endl;
 		file.seekg(chunkSize, std::ios::cur);  // Skip for now
 	}
