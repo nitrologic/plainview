@@ -142,43 +142,37 @@ private:
 
 	std::vector<Bone> bones;
 
+/*
+
+				If token="FACE" Or token="BONE"
+					inface=True
+					While size>0
+						p.lwpoly=NewLWPoly(l)
+						plist(pcount)=p
+						p\n=read16(l) And 1023
+						size=size-2
+						If p\n>15 RuntimeError "Can't handle 15+ sided polygons"
+						For j=0 To p\n-1
+							p\v[j]=vlist(ll\vbase+read16(l))
+						Next
+						pcount=pcount+1
+						size=size-2*p\n
+					Wend
+
+*/
+
 	void readBones(swapReader& in, uint32_t chunkSize) {
-//		char boneID[4];
-//		in.file.read(boneID, 4);
-//		std::cout << "Bone ID: " << boneID[0] << boneID[1] << boneID[2] << boneID[3] << std::endl;
-
 		uint32_t bytes = chunkSize;
-		std::vector<char> name;
 		while (bytes > 0) {
-			if(in.file.eof())
-				break;
 			Bone bone;
-			uint16_t nameLength = in.read16();
+			// read number of bones (n16
+			uint16_t n16 = in.read16();
+			int n = n16 & 1023;
 			bytes -= 2;
-			int count= nameLength;
-			if(count&1)
-				count++;
-			name.resize(count);
-			in.file.read(name.data(), count);
-			bytes -= count;
-
-			bone.name = std::string(name.data(), nameLength - 1);
-			bone.parentIndex = in.read16();
-			bytes -= 2;
-
-			for (int i = 0; i < 3; ++i) {
-				bone.position[i] = in.read32f();
-				bytes -= 4;
+			for (int j = 0; j < n; j++) {
+				uint16_t v = in.read16();
+				bytes -= 2;
 			}
-
-			for (int i = 0; i < 3; ++i) {
-				bone.orientation[i] = in.read32f();
-				bytes -= 4;
-			}
-
-			bone.length = in.read32f();
-			bytes -= 4;
-
 			bones.push_back(bone);
 		}
 		std::cout << "Loaded " << bones.size() << " bones." << std::endl;
