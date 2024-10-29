@@ -7,7 +7,6 @@ A plain view of the modern monitor video display landscape
 Copyright © 2023 Simon Armstrong
 
 All Rights Reserved
-
 */
 
 const char *plainviewVersion = "0.4";
@@ -26,19 +25,22 @@ static bool terminateApp = false;
 #define RUN_PROMPT
 #endif
 
+#include <memory>
+#include <vector>
+
 Monitors allMonitors;
 Monitor NullMonitor;
+Monitor *currentMonitor = &NullMonitor;
 
-Monitor *currentMonitor=&NullMonitor;
-
-void addMonitor(S driver,S name, F scale, int x, int y, int w, int h) {
-	currentMonitor = new Monitor(driver,name,scale,x,y,w,h);
-	allMonitors.push_back(currentMonitor);
+void addMonitor(S driver, S name, F scale, int x, int y, int w, int h) {
+    auto m = new Monitor(driver, name, scale, x, y, w, h);
+    allMonitors.push_back(m);
+    currentMonitor = allMonitors.back();
 }
 
 Driver* sdlOpen() {
-	SDLDriver* driver = new SDLDriver();
-	int displayCount;
+    SDLDriver* driver = new SDLDriver();
+    int displayCount;
 	SDL_DisplayID* sdlDisplays = SDL_GetDisplays(&displayCount);
 	for (int i = 0; i < displayCount; i++) {
 		SDL_DisplayID displayId = sdlDisplays[i];

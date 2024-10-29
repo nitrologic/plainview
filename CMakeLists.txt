@@ -20,7 +20,7 @@ endif(WIN32)
 
 if(UNIX AND NOT APPLE)
 
-# LINUX
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -std=c++17 -fPIE")
 
 set(USE_OPENGLES 1)
 
@@ -37,8 +37,6 @@ link_directories(
 	${CMAKE_SYSROOT}/home/ec2-user/setupredis/redis-stable/deps/hiredis
 )
 
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -std=c++17 -fPIE")
-
 project(drmview
 	LANGUAGES C CXX ASM
 )
@@ -51,7 +49,7 @@ ADD_EXECUTABLE(drmview
 
 #target_link_libraries(drmview m GLESv2 EGL asound cec pthread rt udev drm gbm dl -static-libstdc++)
 
-target_link_libraries(drmview m GLESv2 EGL asound pthread rt udev drm gbm dl -static-libstdc++)
+target_link_libraries(drmview m GLESv2 EGL asound pthread rt udev drm gbm dl stdc++)
 
 endif(UNIX AND NOT APPLE)
 
