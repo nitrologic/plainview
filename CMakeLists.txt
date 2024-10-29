@@ -49,7 +49,9 @@ ADD_EXECUTABLE(drmview
 	drmview.cpp
 )
 
-target_link_libraries(drmview m GLESv2 EGL asound cec pthread rt udev drm gbm dl -static-libstdc++)
+#target_link_libraries(drmview m GLESv2 EGL asound cec pthread rt udev drm gbm dl -static-libstdc++)
+
+target_link_libraries(drmview m GLESv2 EGL asound pthread rt udev drm gbm dl -static-libstdc++)
 
 endif(UNIX AND NOT APPLE)
 

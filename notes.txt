@@ -114,6 +114,9 @@ sudo apt update && sudo apt upgrade
 sudo apt install g++ gdb make
 sudo apt install gcc-arm-none-eabi
 
+// ec2-user
+
+sudo yum install libcurl-devel
 
 -- Could NOT find PkgConfig (missing: PKG_CONFIG_EXECUTABLE) 
 -- Could NOT find ALSA (missing: ALSA_LIBRARY ALSA_INCLUDE_DIR) 
