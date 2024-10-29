@@ -6,7 +6,13 @@
 #include "udev.h"
 //#include "host.h"
 #include "sysinfo.h"
+
+#ifdef _HAS_CEC
+
 #include "cec.h"
+
+#endif
+
 //#include "video.h"
 
 std::string ShadersPath="../shaders";
