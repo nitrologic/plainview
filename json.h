@@ -90,6 +90,10 @@ struct JSObject{
 	std::vector<utf8> names;
 	std::vector<JSValue*> values;
 
+	virtual ~JSObject(){
+
+	}
+
 	size_t size() const{
 		return names.size();
 	}
