@@ -9,7 +9,7 @@ Copyright © 2023 Simon Armstrong
 All Rights Reserved
 */
 
-const char *plainviewVersion = "0.4";
+const char *plainviewVersion = "0.5.0";
 
 static bool terminateApp = false;
 

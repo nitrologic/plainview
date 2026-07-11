@@ -1,3 +1,10 @@
+plainview 0.4
+elapsed micros 1968
+SDL 3.1.7
+SDL_Platform Windows
+
+git submodule update --remote SDL
+
 #add_definitions( -DSDL_PLATFORM_WIN32 )
 #   add_definitions( -D_WIN32_WINNT=0x0501 )
 #   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:fast /EHsc")
